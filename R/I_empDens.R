@@ -16,7 +16,7 @@
     
     # If there are some statistics with zero variace we remove them
     if( length(tmp$lowVar) ) y <- y[-tmp$lowVar]
-      
+    
     rss <- sum( (tmp$E%*%as.vector(y-tmp$mY))^2 )
     llk <- -rss/2 - tmp$half.ldet.V
     mix <- 0

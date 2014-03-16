@@ -4,7 +4,7 @@
 # The arguments are the same as for lm.ridge, but I removed lambda.
 # For details see ?MASS::lm.ridge
 .autoLm.ridge<- function (formula, data, subset, na.action, model = FALSE, 
-                         x = FALSE, y = FALSE, contrasts = NULL, ...) 
+                          x = FALSE, y = FALSE, contrasts = NULL, ...) 
 {
   m <- match.call(expand.dots = FALSE)
   m$model <- m$x <- m$y <- m$contrasts <- m$... <- m$lambda <- NULL
@@ -37,7 +37,7 @@
   s2 <- sum(resid^2)/(n - p - Inter)
   HKB <- (p - 2) * s2/sum(lscoef^2)
   LW <- (p - 2) * s2 * n/sum(lsfit^2)
-
+  
   ########## Matteo's modification
   # Here we estimate the optimal lambda
   
@@ -48,23 +48,23 @@
   tol <- 1e-3
   
   objFun <- function(lambda) {
-
-  dx <- length(d)
-  div <- d^2 + rep(lambda, dx)
-  a <- drop(d * rhs)/div
-  dim(a) <- c(dx, 1)
-  coef <- Xs$v %*% a
-  GCV <- colSums((Y - X %*% coef)^2)/(n - colSums(matrix(d^2/div, dx)))^2
-  
-  return(GCV)
-  
+    
+    dx <- length(d)
+    div <- d^2 + rep(lambda, dx)
+    a <- drop(d * rhs)/div
+    dim(a) <- c(dx, 1)
+    coef <- Xs$v %*% a
+    GCV <- colSums((Y - X %*% coef)^2)/(n - colSums(matrix(d^2/div, dx)))^2
+    
+    return(GCV)
+    
   }
   
   # Enlarge the bracket until we find the optimal penalty
   repeat
   {
     lambda <- optimize(objFun, lower = a, upper = b)$minimum
- 
+    
     # Lambda found if it is not very close to the right end of the bracket
     if( abs(lambda - b) > tol ) break
     

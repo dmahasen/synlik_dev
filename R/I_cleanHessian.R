@@ -24,7 +24,7 @@
     
     # Invert the modified hessian to get the covariance
     COV <- eDec$vectors%*%(t(eDec$vectors) / eDec$values)
-        
+    
     # I identify the parameter with the highest variance, I remove the corresponding
     # elements from the Hessian and I store its index
     bad <- which.max( diag(COV) )

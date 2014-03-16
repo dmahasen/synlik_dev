@@ -74,4 +74,3 @@
 # 
 # plot(out1)
 # points(output, col = 2)
-
