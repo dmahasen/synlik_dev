@@ -2,7 +2,7 @@ useDynLib(synlik)
 exportPattern("^[[:alpha:]]+")
 
 # Imported stuff
-importFrom(combinat, combn)
+#importFrom(combinat, combn)
 
 importFrom(compiler, cmpfun)
 
@@ -18,3 +18,4 @@ importFrom(stats, coef)
 importFrom(stats, vcov)
 importFrom(stats, confint)
 
+importFrom(graphics, plot)

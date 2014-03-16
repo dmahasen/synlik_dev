@@ -14,8 +14,9 @@ Depends:
     RcppArmadillo,
     methods
 Imports:
+    graphics,
+    Matrix,
     compiler,
-    combinat,
     stats,
     parallel
 LinkingTo: Rcpp, RcppArmadillo
