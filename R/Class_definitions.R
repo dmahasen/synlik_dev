@@ -66,8 +66,8 @@ setClassUnion("functionOrNULL", c("function", "NULL"))
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>
 #' @examples
 #' #### Create Object
-#' ricker_sl <- synlik(simulator = rickerStats,
-#'                     summaries = wood2010,
+#' ricker_sl <- synlik(simulator = rickerSimul,
+#'                     summaries = rickerStats,
 #'                     param = c( logR = 3.8, logSigma = log(0.3), logPhi = log(10) ),
 #'                     extraArgs = list("nObs" = 50, "nBurn" = 50),
 #'                     plotFun = function(input, ...) 
@@ -82,27 +82,26 @@ setClassUnion("functionOrNULL", c("function", "NULL"))
 #' @exportClass synlik
 #'
 
-.synlik <- setClass( "synlik",
-                     representation( param = "numeric",
-                                     simulator = "function",
-                                     summaries = "functionOrNULL",
-                                     data = "ANY",
-                                     extraArgs = "list",
-                                     plotFun = "functionOrNULL"
-                     ),
-                       prototype = prototype(
-                       param = numeric(),
-                       simulator = function() NULL,
-                       summaries = NULL,
-                       data = NULL, 
-                       extraArgs = list(),
-                       plotFun = NULL
-                       ),
-                     
-                     validity = .check.synlik
+setClass( "synlik",
+          representation( param = "numeric",
+                          simulator = "function",
+                          summaries = "functionOrNULL",
+                          data = "ANY",
+                          extraArgs = "list",
+                          plotFun = "functionOrNULL"
+          ),
+          prototype = prototype(
+            param = numeric(),
+            simulator = function() NULL,
+            summaries = NULL,
+            data = NULL, 
+            extraArgs = list(),
+            plotFun = NULL
+          ),
+          
+          validity = .check.synlik
 )
 
-#' Constructor for synlik class
 #' @rdname synlik-class
 synlik <- function(...)
 {
@@ -125,7 +124,7 @@ synlik <- function(...)
 .check.smcmc <- function(object)
 {
   if(!is(object, "smcmc")) stop("object has to be of class \"smcmc\" ")
-
+  
   errors <- character()
   
   if(length(object@initPar) == 0) errors <- c(errors, "length(initPar) should be > 0")
@@ -138,7 +137,7 @@ synlik <- function(...)
 #' \code{smcmc-class}
 #' 
 #' @description{ Object representing the results of MCMC estimation on an object of class \code{synlik}, from which it inherits.  }
-#'
+#' 
 #' \section{Slots}{
 #' \describe{
 #'    \item{initPar}{Vector of initial parameters where the MCMC chain will start (\code{numeric}).}
@@ -163,11 +162,22 @@ synlik <- function(...)
 #'                      in the parameter space at the i-th (\code{matrix}).}
 #'    \item{llkChain}{Vector of niter elements where the i-th element is contains the estimate of the 
 #'                       synthetic likelihood at the i-th iteration (\code{numeric}).}
-#'    \item{control}{Control parameters used by the MCMC sampler.}
+#'    \item{control}{Control parameters used by the MCMC sampler: \itemize{
+#'                   \item{\code{theta} = controls the speed of adaption. Should be between 0.5 and 1.
+#'                                        A lower gamma leads to faster adaption.}
+#'                   \item{\code{adaptStart} = iteration where the adaption starts. Default 0.}
+#'                   \item{\code{adaptStop} = iteration where the adaption stops. Default \code{burn + niter}}
+#'                   \item{\code{saveFile} = path to the file where the intermediate results will be stored (ex: "~/Res.RData").}
+#'                   \item{\code{saveFreq} = frequency with which the intermediate results will be saved on \code{saveFile}.
+#'                                           Default 100.}
+#'                   \item{\code{verbose} = if \code{TRUE} intermediate posterior means will be printer.}
+#'                   \item{\code{verbFreq} = frequency with which the intermediate posterior means will be printer. Default 500.}
+#' } }
 #'  }
 #'  
 #' @name smcmc-class
 #' @rdname smcmc-class
+#' @exportClass smcmc
 #' @references Vihola, M. (2011) Robust adaptive Metropolis algorithm with coerced acceptance rate. 
 #'             Statistics and Computing. 
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>
@@ -192,45 +202,45 @@ synlik <- function(...)
 #' ricker_sl <- continue(ricker_sl, niter = 50)
 #' 
 #' plot(ricker_sl)       
-#' @exportClass smcmc
 #'
-.smcmc <-setClass("smcmc",
-                    representation( initPar = "numeric",
-                                    niter = "integer",
-                                    nsim = "integer",
-                                    propCov = "matrix",
-                                    burn = "integer",
-                                    priorFun = "function",
-                                    
-                                    targetRate = "numericOrNULL",
-                                    recompute = "logical",
-                                    multicore = "logical",
-                                    ncores = "integer",
-                                    control = "list",
-                                    
-                                    accRate = "numeric",
-                                    chains = "matrix",
-                                    llkChain = "numeric"
-                    ),
-                    prototype = prototype(initPar = numeric(),
-                                          niter = 0L,
-                                          nsim = 0L, 
-                                          propCov = matrix( , 0, 0),
-                                          burn = 0L,
-                                          priorFun = function(param, ...) 0,
-                                          
-                                          targetRate = NULL,
-                                          recompute = FALSE,
-                                          multicore = FALSE,
-                                          ncores = 1L,
-                                          control = list(),
-                                          
-                                          accRate = numeric(),
-                                          chains = matrix( , 0, 0),
-                                          llkChain = numeric()),
-                    contains = "synlik",
-                    validity = .check.smcmc
+setClass("smcmc",
+         representation( initPar = "numeric",
+                         niter = "integer",
+                         nsim = "integer",
+                         propCov = "matrix",
+                         burn = "integer",
+                         priorFun = "function",
+                         
+                         targetRate = "numericOrNULL",
+                         recompute = "logical",
+                         multicore = "logical",
+                         ncores = "integer",
+                         control = "list",
+                         
+                         accRate = "numeric",
+                         chains = "matrix",
+                         llkChain = "numeric"
+         ),
+         prototype = prototype(initPar = numeric(),
+                               niter = 0L,
+                               nsim = 0L, 
+                               propCov = matrix( , 0, 0),
+                               burn = 0L,
+                               priorFun = function(param, ...) 0,
+                               
+                               targetRate = NULL,
+                               recompute = FALSE,
+                               multicore = FALSE,
+                               ncores = 1L,
+                               control = list(),
+                               
+                               accRate = numeric(),
+                               chains = matrix( , 0, 0),
+                               llkChain = numeric()),
+         contains = "synlik",
+         validity = .check.smcmc
 )
+
 
 
 
@@ -296,32 +306,32 @@ synlik <- function(...)
                                       continueCtrl = "list",
                                       multicore = "logical",
                                       ncores = "integer",
-                                    
+                                      
                                       resultPar = "matrix",
                                       resultGrad = "matrix",
                                       resultHess  = "list",
                                       resultCovar = "list",
                                       resultLoglik = "numeric"
-                    ),
-                    prototype = prototype(initPar = numeric(),
-                                          niter   = 0L,
-                                          nsim    = 0L,
-                                          initCov   = matrix( , 0, 0),
-                                          addRegr  = TRUE,
-                                          constr = list(),
-                                          control = list(),
-                                          continueCtrl = list(),
-                                          multicore = FALSE,
-                                          ncores = 1L,
-                                          
-                                          resultPar = matrix( , 0, 0),
-                                          resultGrad = matrix( , 0, 0),
-                                          resultHess = list(),
-                                          resultCovar = list(),
-                                          resultLoglik = numeric()
-                                          ),
-                    contains = "synlik",
-                    validity = .check.synMaxlik)
+                      ),
+                      prototype = prototype(initPar = numeric(),
+                                            niter   = 0L,
+                                            nsim    = 0L,
+                                            initCov   = matrix( , 0, 0),
+                                            addRegr  = TRUE,
+                                            constr = list(),
+                                            control = list(),
+                                            continueCtrl = list(),
+                                            multicore = FALSE,
+                                            ncores = 1L,
+                                            
+                                            resultPar = matrix( , 0, 0),
+                                            resultGrad = matrix( , 0, 0),
+                                            resultHess = list(),
+                                            resultCovar = list(),
+                                            resultLoglik = numeric()
+                      ),
+                      contains = "synlik",
+                      validity = .check.synMaxlik)
 
 
 
@@ -371,42 +381,42 @@ synlik <- function(...)
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>
 #' @exportClass sml
 .sml <-setClass("sml",
-                      representation( initPar = "numeric",
-                                      initCov   = "matrix",
-                                      niter   = "integer",
-                                      nsim    = "integer",
-                                      np      = "integer",
-                                      priorFun = "functionOrNULL",
-                                      alpha = "numeric",
-                                      constr = "list",
-                                      temper = "numericOrNULL",
-                                      recycle = "logical",
-                                      multicore = "logical",
-                                      ncores = "integer",
+                representation( initPar = "numeric",
+                                initCov   = "matrix",
+                                niter   = "integer",
+                                nsim    = "integer",
+                                np      = "integer",
+                                priorFun = "functionOrNULL",
+                                alpha = "numeric",
+                                constr = "list",
+                                temper = "numericOrNULL",
+                                recycle = "logical",
+                                multicore = "logical",
+                                ncores = "integer",
+                                
+                                estim = "matrix",
+                                simLogLik = "numeric",
+                                simLogPrior = "numeric",
+                                simPar  = "matrix"
+                ),
+                prototype = prototype(initPar = numeric(),
+                                      initCov   = matrix( , 0, 0),
+                                      niter   = 0L,
+                                      nsim    = 0L,
+                                      np      = 0L,
+                                      priorFun = NULL,
+                                      alpha = 0.95,
+                                      constr = list(),
+                                      temper = NULL,
+                                      recycle = FALSE,
+                                      multicore = FALSE,
+                                      ncores = 1L,
                                       
-                                      estim = "matrix",
-                                      simLogLik = "numeric",
-                                      simLogPrior = "numeric",
-                                      simPar  = "matrix"
-                      ),
-                      prototype = prototype(initPar = numeric(),
-                                            initCov   = matrix( , 0, 0),
-                                            niter   = 0L,
-                                            nsim    = 0L,
-                                            np      = 0L,
-                                            priorFun = NULL,
-                                            alpha = 0.95,
-                                            constr = list(),
-                                            temper = NULL,
-                                            recycle = FALSE,
-                                            multicore = FALSE,
-                                            ncores = 1L,
-                                            
-                                            estim  = matrix( , 0, 0),
-                                            simLogLik = numeric(),
-                                            simLogPrior = numeric(),
-                                            simPar = matrix( , 0, 0)
-                                            
-                      ),
-                      contains = "synlik",
-                      validity = .check.sml)
+                                      estim  = matrix( , 0, 0),
+                                      simLogLik = numeric(),
+                                      simLogPrior = numeric(),
+                                      simPar = matrix( , 0, 0)
+                                      
+                ),
+                contains = "synlik",
+                validity = .check.sml)

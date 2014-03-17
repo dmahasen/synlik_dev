@@ -2,8 +2,6 @@ useDynLib(synlik)
 exportPattern("^[[:alpha:]]+")
 
 # Imported stuff
-#importFrom(combinat, combn)
-
 importFrom(compiler, cmpfun)
 
 importFrom(parallel, clusterApply)
