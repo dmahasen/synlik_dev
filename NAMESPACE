@@ -17,3 +17,5 @@ importFrom(stats, vcov)
 importFrom(stats, confint)
 
 importFrom(graphics, plot)
+
+importFrom(Matrix, nearPD)
