@@ -1,27 +1,21 @@
 
-# Only difference with "smcmc": argument "nchains" is missing
+# Only difference with "smcmc": arguments "nchains", "nsim" are missing
 
-.smcmc <- function(object, 
-                   initPar, 
-                   niter, 
-                   nsim,
-                   propCov, 
-                   burn = 0,
-                   priorFun = function(param, ...) 0,
-                   targetRate = NULL,
-                   recompute = FALSE,
-                   multicore = !is.null(cluster),
-                   cluster = NULL,
-                   ncores = detectCores() - 1, 
-                   control = list(),
-                   ...)
+.mcmc <- function(likFun, 
+                  initPar, 
+                  niter, 
+                  propCov, 
+                  burn = 0,
+                  priorFun = function(param, ...) 0,
+                  targetRate = NULL,
+                  recompute = FALSE,
+                  multicore = !is.null(cluster),
+                  cluster = NULL,
+                  ncores = detectCores() - 1, 
+                  control = list(),
+                  ...)
 {
-  if(!is(object, "synlik")) stop("object has to be of class \"synlik\" ")
   
-  # Reduce the object to "synlik" so that I avoid moving around all the additional slots of the "synMaxlik" class
-  if( !class(object)[[1]] != "synlik" ) object <- as(object, "synlik")
-  
-  y <- object@data
   totalIter <- niter + burn
   
   # Control list which will be used internally
@@ -72,13 +66,6 @@
   
   unifVar <- runif(totalIter)
   
-  if(multicore){
-    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik")
-    cluster <- tmp$cluster
-    ncores <- tmp$ncores
-    clusterCreated <- tmp$clusterCreated
-  }
-  
   # Mcmc main loop
   storeIndex <- 1
   for(ii in 1:totalIter){
@@ -94,12 +81,12 @@
     if( is.finite(propPrior) )
     { 
       # Compute likelihood of proposed param
-      propLogLik <- try( slik(object, param = propPar, nsim = nsim, multicore = multicore, ncores = ncores, cluster = cluster, ...) )
+      propLogLik <- try( likFun(param = propPar, multicore = multicore, ncores = ncores, cluster = cluster, ...) )
       if( !is.numeric(propLogLik) || !is.finite(propLogLik) ) propLogLik <- -Inf
       
       # (Optionally) recompute likelihood at old parameters
       if(recompute){ 
-        tmpLik <- try( slik(object, param = currPar, nsim = nsim, multicore = multicore, ncores = ncores, cluster = cluster, ...) )
+        tmpLik <- try( likFun(param = currPar, multicore = multicore, ncores = ncores, cluster = cluster, ...) )
         if( is.numeric(tmpLik) && is.finite(tmpLik) ) currLogLik <- tmpLik
       }
       
@@ -134,24 +121,10 @@
     
     # (Optionally) save the object to file
     if( !is.null(ctrl$saveFile) && !(ii %% ctrl$saveFreq) ){ 
-      save(file = ctrl$saveFile, 
-           new( "smcmc",
-                object,
-                initPar = initPar,
-                niter = as.integer(niter),
-                nsim =  as.integer(nsim), 
-                propCov = propCov,
-                burn = as.integer(burn),
-                priorFun = priorFun,
-                targetRate = targetRate,
-                recompute = recompute,
-                multicore = multicore,
-                ncores = as.integer(ncores),
-                control = control,
-                
-                accRate = accept/niter,
-                chains = mcmcSample,
-                llkChain = llkChain))
+      
+      out <- list("accRate" = accept / niter, "chains"  = mcmcSample, "llkChain" = llkChain)
+      
+      save(file = ctrl$saveFile, out)   
     }
     
     # (Optionally) print out intermediate results
@@ -165,25 +138,6 @@
     
   }
   
-  # Close the cluster if it was opened inside this function
-  if(multicore && clusterCreated) stopCluster(cluster)
-  
-  return( new( "smcmc",
-               object,
-               initPar = initPar,
-               niter = as.integer(niter),
-               nsim =  as.integer(nsim), 
-               propCov = propCov,
-               burn = as.integer(burn),
-               priorFun = priorFun,
-               targetRate = targetRate,
-               recompute = recompute,
-               multicore = multicore,
-               ncores = as.integer(ncores),
-               control = control,
-               
-               accRate = accept/niter,
-               chains = mcmcSample,
-               llkChain = llkChain)  )
+  return( list("accRate" = accept / niter, "chains"  = mcmcSample, "llkChain" = llkChain) )
   
 }

@@ -48,53 +48,67 @@ smcmc <- function(object,
                   control = list(),
                   ...)
 {
+  # This can be used only for objects of class "synlik"
+  if(!is(object, "synlik")) stop("object has to be of class \"synlik\" ")
+  
+  # Reduce the object to "synlik" so that I avoid moving around all the additional slots of the "synMaxlik" class
+  if( !class(object)[[1]] != "synlik" ) object <- as(object, "synlik")
   
   # Force evaluation of everything in the environment, so it will available to funToApply on cluster
   if( multicore ) .forceEval(ALL = TRUE)
   
-  # multicore, ncores and cluster go in the ...
-  funToApply <- function(notUsed, ...)
+  # multicore, ncores and cluster go in the "..."
+  likFun <- function(param, multicore, ncores, cluster, ...)
   {
-    .smcmc(object = object, 
-           initPar = initPar, 
-           niter = niter, 
-           nsim = nsim,
-           propCov = propCov, 
-           burn = burn,
-           priorFun = priorFun,
-           targetRate = targetRate,
-           recompute = recompute,
-           control = control,
-           ...) 
+    if( !is.loaded("synlik") ) library("synlik")
+    
+    slik(object = object, 
+         param = param, 
+         nsim = nsim, 
+         multicore = multicore,
+         ncores = ncores,
+         cluster = cluster,
+         ...) 
   }
   
-  out <-  if(nchains > 1 && multicore)
-  {
-    if(multicore)
-    {
-      tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
-      cluster <- tmp$cluster
-      ncores <- tmp$ncores
-      clusterCreated <- tmp$clusterCreated
-    }
-        
-    # nchains each on one cores, each node of the cluster take one chain
-    parLapply(cl  = cluster,
-              X   = 1:nchains, 
-              fun = funToApply,
-              multicore = FALSE,
-              ncores = 1,
-              cluster = NULL,
-              ...)
-  } else {
-    # Only one chain which uses the whole cluster
-    lapply(1:nchains, 
-           funToApply,
-           multicore = multicore,
-           ncores = ncores,
-           cluster = cluster,
-           ...)
-  }
+  mcmcOut <- mcmc(likFun = likFun, 
+                  initPar = initPar, 
+                  niter   = niter, 
+                  propCov = propCov, 
+                  burn = burn,
+                  nchains = nchains,
+                  priorFun = priorFun,
+                  targetRate = targetRate,
+                  recompute = recompute,
+                  multicore = multicore,
+                  cluster = cluster,
+                  ncores = ncores, 
+                  control = control,
+                  ...)
+  
+  if(nchains == 1) mcmcOut <- list(mcmcOut)
+
+  out <- lapply(mcmcOut, 
+                function(input){
+                  new( "smcmc",
+                       object,
+                       initPar = initPar,
+                       niter = as.integer(niter),
+                       nsim =  as.integer(nsim), 
+                       propCov = propCov,
+                       burn = as.integer(burn),
+                       priorFun = priorFun,
+                       targetRate = targetRate,
+                       recompute = recompute,
+                       multicore = multicore,
+                       ncores = as.integer(ncores),
+                       control = control,
+                       
+                       accRate  = input$accRate,
+                       chains   = input$chains,
+                       llkChain = input$llkChain )
+                }
+                )
   
   if(nchains == 1) out <- out[[1]]
   
