@@ -12,9 +12,9 @@ sml <- function(object, initPar, initCov, np, nsim, niter, alpha = 0.95,
   if( multicore ) .forceEval(ALL = TRUE)
   
   # Function that will be used by sapply() or clusterApply to evaluate the likelihood
-  likFun <- function(param, temper, ...)
+  likFun <- function(param, ...)
   {
-    slik(object, param, nsim, multicore = FALSE, cluster = NULL, temper = temper, ...)
+    slik(object, param, nsim, multicore = FALSE, cluster = NULL, ...)
   }
   
   # Calling general maximum likelihood method
