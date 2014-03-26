@@ -10,7 +10,6 @@
 #'                If FALSE hessians will be simulated the asymptotic distribution of the regression
 #'                coefficients.
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>
-#' @export
 #' 
 
 .vcov.ml <- function(llk, parMat, nreps = 1000, boot = TRUE, ...)
@@ -62,7 +61,7 @@
       }
     } else {
       # Using asymptotic covariance
-      coefMat <- .rmvn(nreps, mu = meanCoef, sigma = vcov(fit)[ -linPar, -linPar ]) 
+      coefMat <- .rmvn(nreps, mu = meanCoef, sigma = vcov(fit)[ -linPar, -linPar, drop = FALSE ]) 
     }
     
     # Extract simulated hessian and their conditioning number

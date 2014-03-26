@@ -6,14 +6,13 @@ sml <- function(object, initPar, initCov, np, nsim, niter, alpha = 0.95,
 {
   if( is.null(names(initPar)) ) names(initPar) <- names(object@param)
   
-  message("remember to check why the recycling isn't working!!")
-  
   # Force evaluation of everything in the environment, so it will available to likfun on cluster
   if( multicore ) .forceEval(ALL = TRUE)
   
   # Function that will be used by sapply() or clusterApply to evaluate the likelihood
   likFun <- function(param, ...)
   {
+    require("synlik")
     slik(object, param, nsim, multicore = FALSE, cluster = NULL, ...)
   }
   
@@ -37,15 +36,15 @@ sml <- function(object, initPar, initCov, np, nsim, niter, alpha = 0.95,
   return( .sml(object, 
                initPar = initPar, 
                initCov = initCov, 
-               np = np, 
-               nsim = nsim, 
-               niter = niter,
+               np = as.integer(np), 
+               nsim = as.integer(nsim), 
+               niter = as.integer(niter),
                priorFun = priorFun,
                alpha = alpha,
                temper = temper,
                recycle = recycle,
                multicore = multicore, 
-               ncores = ncores, 
+               ncores = as.integer(ncores), 
                constr = constr,
                
                estim = tmp$estim,
