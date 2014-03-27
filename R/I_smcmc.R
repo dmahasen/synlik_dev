@@ -82,12 +82,19 @@
     { 
       # Compute likelihood of proposed param
       propLogLik <- try( likFun(param = propPar, multicore = multicore, ncores = ncores, cluster = cluster, ...) )
-      if( !is.numeric(propLogLik) || !is.finite(propLogLik) ) propLogLik <- -Inf
+      if( !is.numeric(propLogLik) || !is.finite(propLogLik) ) {
+        warning(paste("One function was equal to", propLogLik, "and I put it to -Inf."))
+        propLogLik <- -Inf 
+      }
       
       # (Optionally) recompute likelihood at old parameters
       if(recompute){ 
         tmpLik <- try( likFun(param = currPar, multicore = multicore, ncores = ncores, cluster = cluster, ...) )
-        if( is.numeric(tmpLik) && is.finite(tmpLik) ) currLogLik <- tmpLik
+        if( is.numeric(tmpLik) && is.finite(tmpLik) ){ 
+          currLogLik <- tmpLik 
+        } else {
+          warning(paste("One function was equal to", currLogLik, "and I put it to -Inf."))
+        }
       }
       
       # Compute acceptance ratio

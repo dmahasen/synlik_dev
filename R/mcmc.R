@@ -18,7 +18,6 @@ mcmc <- function(likFun,
                  multicore = !is.null(cluster),
                  cluster = NULL,
                  ncores = detectCores() - 1, 
-                 libraries = c(),
                  control = list(),
                  ...)
 {
@@ -27,7 +26,7 @@ mcmc <- function(likFun,
     # Force evaluation of everything in the environment, so it will available to funToApply on cluster
     .forceEval(ALL = TRUE)
     
-      tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = libraries, exportALL = TRUE)
+      tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
       cluster <- tmp$cluster
       ncores <- tmp$ncores
       clusterCreated <- tmp$clusterCreated

@@ -60,7 +60,7 @@ smcmc <- function(object,
   # multicore, ncores and cluster go in the "..."
   likFun <- function(param, multicore, ncores, cluster, ...)
   {
-    if( !is.loaded("synlik") ) library("synlik")
+    require("synlik")
     
     slik(object = object, 
          param = param, 

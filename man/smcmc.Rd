@@ -53,9 +53,9 @@
   \code{synlik}.
 }
 \details{
-  When \code{multicore == TRUE} there are two kinds of
-  parallelization: if \code{nchains == 1} the the
-  parallelism takes place at each step of the MCMC chain
+  When \code{multicore == TRUE} there are two possible
+  behaviours: if \code{nchains == 1} the the parallelism
+  takes place at each step of the MCMC chain
   (\code{object@simulator} and \code{object@summaries} are
   called in parallel). If \code{nchains > 1} each chain
   will be assigned to a different node of the cluster, and

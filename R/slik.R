@@ -26,7 +26,6 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   .slik(object = object, 
         param = param, 
         nsim  = nsim, 
-        saddle = FALSE, 
         decay = 0.5, 
         multicore = multicore, 
         ncores = ncores, 
