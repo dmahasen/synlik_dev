@@ -2,8 +2,7 @@
 {
   if(!is(x, "smcmc")) stop("object has to be of class \"smcmc\" ")
   chains <- x@chains
-  colnames(chains) <- names(x@param)
-  
+
   oldPar <- par(no.readonly = TRUE)
   
   if(nrow(chains) > 0 )
@@ -20,13 +19,14 @@
     
     print("Plotting the log-likelihood chain")
     par(mfrow = c(1, 1))
-    plot(1:nrow(chains), x@llkChain, xlab = "Iteration", ylab = "Log-likelihood", main = "Log-likelihood chain", type = 'l', ...)
+    matplot(1:nrow(chains), x@llkChain, xlab = "Iteration", ylab = "Log-likelihood", main = "Log-likelihood chain", type = 'l', ...)
   }
   
   readline(prompt = "Press <Enter> to see the next plot...")
   
   print("Plotting correlation structure of the posterior sample")
-  .plotMatrix(cor(chains), title = "Posterior correlations", xLabels = names(x@param), yLabels = names(x@param), 
+  mat <- apply(chains, 2, function(input) input)
+  .plotMatrix(cor(mat), title = "Posterior correlations", xLabels = names(x@param), yLabels = names(x@param), 
               scaleLab = "Correlation", correl = TRUE, ...)
   
   readline(prompt = "Press <Enter> to see the next plot...")
