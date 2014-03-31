@@ -15,7 +15,7 @@ sml <- function(object, initPar, initCov, np, nsim, niter, alpha = 0.95,
     require("synlik")
     slik(object, param, nsim, multicore = FALSE, cluster = NULL, ...)
   }
-  
+    
   # Calling general maximum likelihood method
   tmp <- ml(likFun = likFun, 
             initPar = initPar, 
@@ -32,6 +32,8 @@ sml <- function(object, initPar, initCov, np, nsim, niter, alpha = 0.95,
             constr = constr,
             verbose = verbose,
             ...)
+  
+  colnames(tmp$estim) <- names(initPar)
   
   return( .sml(object, 
                initPar = initPar, 
