@@ -23,20 +23,37 @@ mcmc <- function(likFun,
 {
   
   if( multicore ){ 
-    # Force evaluation of everything in the environment, so it will available to funToApply on cluster
+    # Force evaluation of everything in the environment, so it will available to singleChain on cluster
     .forceEval(ALL = TRUE)
     
-      tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
-      cluster <- tmp$cluster
-      ncores <- tmp$ncores
-      clusterCreated <- tmp$clusterCreated
+    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
+    cluster <- tmp$cluster
+    ncores <- tmp$ncores
+    clusterCreated <- tmp$clusterCreated
+    registerDoSNOW(cluster)
   }
   
+  # Prepare initial values in matrix form for apply(). Each row is a parameters set.
+  if( is.vector(initPar) ) initPar <- t(initPar)
+    
+  if( is.matrix(initPar) ){
+    
+    if( nrow(initPar) == 1 ) initPar <- matrix(initPar, nchains, ncol(initPar), 
+                                               byrow = TRUE, dimnames = list(NULL, colnames(initPar)))
+    
+    if( nrow(initPar) != nchains ) stop("nrow(initPar) should be either 1 or nchains")
+    
+  } else {
+    
+    stop("initPar should be either a matrix or a vector")
+         
+  }
+    
   # multicore, ncores and cluster go in the ...
-  funToApply <- function(notUsed, ...)
+  singleChain <- function(input, ...)
   {
     .mcmc(likFun = likFun, 
-          initPar = initPar, 
+          initPar = input, 
           niter = niter, 
           propCov = propCov, 
           burn = burn,
@@ -47,30 +64,57 @@ mcmc <- function(likFun,
           ...) 
   }
   
-  out <-  if(nchains > 1 && multicore)
-  {
-    # nchains each on one cores, each node of the cluster take one chain
-    parLapply(cl  = cluster,
-              X   = 1:nchains, 
-              fun = funToApply,
-              multicore = FALSE,
-              ncores = 1,
-              cluster = NULL,
-              ...)
+  # Each chain goes on one node
+  if(nchains > 1 && multicore){
+    funMulti <- FALSE
+    funCluster <- FALSE
+    funNcores <- 1
   } else {
-    # Only one chain which uses the whole cluster
-    lapply(1:nchains, 
-           funToApply,
-           multicore = multicore,
-           ncores = ncores,
-           cluster = cluster,
-           ...)
+  # Only one chains where likelihood is evaluated in parallel 
+    funMulti <- multicore
+    funCluster <- cluster
+    funNcores <- ncores
   }
+  
+  # Launch MCMC chain(s)
+  withCallingHandlers({
+    out <- alply(.data = initPar,
+                 .margins = 1,
+                 .fun = singleChain,
+                 .parallel = multicore && (nchains > 1),
+                 # ... from here
+                 multicore = funMulti,
+                 ncores = funNcores,
+                 cluster = funCluster,
+                 ...
+                 )
+  }, warning = function(w) {
+    # There is a bug in plyr concerning a useless warning about "..."
+    if (length(grep("... may be used in an incorrect context", conditionMessage(w))))
+      invokeRestart("muffleWarning")
+  })
   
   # Close the cluster if it was opened inside this function
   if(multicore && clusterCreated) stopCluster(cluster)
   
-  if(nchains == 1) out <- out[[1]]
+  # Extracting acceptance rates
+  accRate <- sapply(out, "[[", "accRate")
   
-  return(out)
+  # Putting chains in an niter X npar X nchains array
+  chains <- lapply(out, "[[", "chains")
+  chains <- do.call("abind", c(chains, "along" = 3))
+  
+  # Putting chains in an niter X npar X nchains array
+  parStore <- lapply(out, "[[", "parStore")
+  parStore <- do.call("abind", c(parStore, "along" = 3))
+  
+  # Putting llkChain is a matrix niter X nchains
+  llkChain <- do.call("cbind", lapply(out, "[[", "llkChain")) 
+  llkStore <- do.call("cbind", lapply(out, "[[", "llkStore"))
+  
+  return( list("accRate" = accRate, 
+               "chains" = chains, 
+               "llkChain" = llkChain, 
+               "parStore" = parStore,
+               "llkStore" = llkStore) )
 }

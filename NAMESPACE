@@ -2,24 +2,30 @@ useDynLib(synlik)
 exportPattern("^[[:alpha:]]+")
 
 # Imported stuff
-importFrom(compiler, cmpfun)
+importFrom(compiler, "cmpfun")
 
 importFrom(methods)
 
+importFrom(abind, "abind")
+
+importFrom(plyr, "alply")
+
+importFrom(doSNOW, "registerDoSNOW")
+
 importFrom(Rcpp)
 
-importFrom(parallel, clusterApply)
-importFrom(parallel, clusterEvalQ)
-importFrom(parallel, clusterExport)
-importFrom(parallel, makeCluster)
-importFrom(parallel, stopCluster)
-importFrom(parallel, detectCores)
+importFrom(parallel, "clusterApply")
+importFrom(parallel, "clusterEvalQ")
+importFrom(parallel, "clusterExport")
+importFrom(parallel, "makeCluster")
+importFrom(parallel, "stopCluster")
+importFrom(parallel, "detectCores")
 
-importFrom(stats, simulate)
-importFrom(stats, coef)
-importFrom(stats, vcov)
-importFrom(stats, confint)
+importFrom(stats, "simulate")
+importFrom(stats, "coef")
+importFrom(stats, "vcov")
+importFrom(stats, "confint")
 
-importFrom(graphics, plot)
+importFrom(graphics, "plot")
 
-importFrom(Matrix, nearPD)
+importFrom(Matrix, "nearPD")

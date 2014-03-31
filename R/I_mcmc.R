@@ -56,8 +56,8 @@
   currPar <- unname( initPar );
   propPar <- numeric(nPar);
   
-  mcmcSample <- matrix(NA, niter, nPar);
-  llkChain <- numeric(niter);
+  mcmcSample <- parStore <- matrix(NA, niter, nPar);
+  llkChain <- llkStore <- numeric(niter);
   
   currLogLik <- propLogLik <- tmpLik <- -10^99;
   currPrior <- priorFun(initPar, ...)
@@ -67,7 +67,7 @@
   unifVar <- runif(totalIter)
   
   # Mcmc main loop
-  storeIndex <- 1
+  istore <- 1
   for(ii in 1:totalIter){
     
     # Propose new parameters
@@ -114,9 +114,11 @@
     
     # Store iteration if iteration > burn-in
     if(ii > burn) {
-      mcmcSample[storeIndex, ] <- currPar;
-      llkChain[storeIndex] <- currLogLik;
-      storeIndex <- storeIndex + 1
+      mcmcSample[istore, ] <- currPar;
+      llkChain[istore] <- currLogLik;
+      parStore[istore, ] <- propPar
+      llkStore[istore] <- propLogLik
+      istore <- istore + 1
     }
     
     # (Optionally) adapt the proposal distribution, by updatint the transpose of its Cholesky factor
@@ -145,6 +147,12 @@
     
   }
   
-  return( list("accRate" = accept / niter, "chains"  = mcmcSample, "llkChain" = llkChain) )
+  colnames(mcmcSample) <- names(initPar)
+  
+  return( list("accRate" = accept / niter, 
+               "chains"  = mcmcSample, 
+               "llkChain" = llkChain, 
+               "parStore" = parStore,
+               "llkStore" = llkStore) )
   
 }

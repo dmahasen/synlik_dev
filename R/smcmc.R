@@ -54,8 +54,18 @@ smcmc <- function(object,
   # Reduce the object to "synlik" so that I avoid moving around all the additional slots of the "synMaxlik" class
   if( !class(object)[[1]] != "synlik" ) object <- as(object, "synlik")
   
-  # Force evaluation of everything in the environment, so it will available to funToApply on cluster
-  if( multicore ) .forceEval(ALL = TRUE)
+  if( multicore ){ 
+    # Force evaluation of everything in the environment, so it will available to funToApply on cluster
+    .forceEval(ALL = TRUE)
+    
+    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
+    cluster <- tmp$cluster
+    ncores <- tmp$ncores
+    clusterCreated <- tmp$clusterCreated
+  }
+  
+  if( !is.matrix(initPar) ) initPar <- t(initPar)
+  if( is.null(colnames(initPar)) ) colnames(initPar) <- names(object@param)
   
   # multicore, ncores and cluster go in the "..."
   likFun <- function(param, multicore, ncores, cluster, ...)
@@ -86,31 +96,29 @@ smcmc <- function(object,
                   control = control,
                   ...)
   
-  if(nchains == 1) mcmcOut <- list(mcmcOut)
-
-  out <- lapply(mcmcOut, 
-                function(input){
-                  new( "smcmc",
-                       object,
-                       initPar = initPar,
-                       niter = as.integer(niter),
-                       nsim =  as.integer(nsim), 
-                       propCov = propCov,
-                       burn = as.integer(burn),
-                       priorFun = priorFun,
-                       targetRate = targetRate,
-                       recompute = recompute,
-                       multicore = multicore,
-                       ncores = as.integer(ncores),
-                       control = control,
-                       
-                       accRate  = input$accRate,
-                       chains   = input$chains,
-                       llkChain = input$llkChain )
-                }
-                )
+  # Close the cluster if it was opened inside this function
+  if(multicore && clusterCreated) stopCluster(cluster)
   
-  if(nchains == 1) out <- out[[1]]
-  
+  out <- new( "smcmc",
+              object,
+              initPar = initPar,
+              niter = as.integer(niter),
+              nsim =  as.integer(nsim), 
+              propCov = propCov,
+              burn = as.integer(burn),
+              nchains = as.integer(nchains),
+              priorFun = priorFun,
+              targetRate = targetRate,
+              recompute = recompute,
+              multicore = multicore,
+              ncores = as.integer(ncores),
+              control = control,
+              
+              accRate  = mcmcOut$accRate,
+              chains   = mcmcOut$chains,
+              llkChain = mcmcOut$llkChain,
+              parStore = mcmcOut$parStore,
+              llkStore = mcmcOut$llkStore)
+    
   return(out)
 }

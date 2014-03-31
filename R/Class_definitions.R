@@ -25,6 +25,13 @@ setClassUnion("ANYOrNULL", c("ANY", "NULL"))
 #' @exportClass functionOrNULL
 setClassUnion("functionOrNULL", c("function", "NULL"))
 
+#' Dummy class
+#' @description Class unions for internal use only
+#' @name numericORmatrix-class
+#' @rdname numericORmatrix-class
+#' @exportClass numericORmatrix
+setClassUnion("numericORmatrix", c("numeric", "matrix"))
+
 ##################################
 ######### synlik: the base class
 ##################################
@@ -222,11 +229,12 @@ synlik <- function(...)
 #' plot(ricker_sl)       
 #'
 setClass("smcmc",
-         representation( initPar = "numeric",
+         representation( initPar = "numericORmatrix",
                          niter = "integer",
                          nsim = "integer",
                          propCov = "matrix",
                          burn = "integer",
+                         nchains = "integer",
                          priorFun = "function",
                          
                          targetRate = "numericOrNULL",
@@ -236,14 +244,17 @@ setClass("smcmc",
                          control = "list",
                          
                          accRate = "numeric",
-                         chains = "matrix",
-                         llkChain = "numeric"
+                         chains = "array",
+                         llkChain = "matrix",
+                         parStore = "array",
+                         llkStore = "matrix"
          ),
          prototype = prototype(initPar = numeric(),
                                niter = 0L,
                                nsim = 0L, 
                                propCov = matrix( , 0, 0),
                                burn = 0L,
+                               nchains = 1L,
                                priorFun = function(param, ...) 0,
                                
                                targetRate = NULL,
@@ -254,7 +265,10 @@ setClass("smcmc",
                                
                                accRate = numeric(),
                                chains = matrix( , 0, 0),
-                               llkChain = numeric()),
+                               llkChain = matrix( , 0, 0),
+                               parStore = matrix( , 0, 0),
+                               llkStore = matrix( , 0, 0)),
+                               
          contains = "synlik",
          validity = .check.smcmc
 )

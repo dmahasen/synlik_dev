@@ -6,6 +6,7 @@
                             niter = object@niter,
                             nsim = object@nsim,
                             propCov = object@propCov, 
+                            priorFun = object@priorFun,
                             targetRate = object@targetRate,
                             recompute = object@recompute,
                             multicore = object@multicore,
@@ -22,34 +23,38 @@
   
   # For initPar and burn unless they have been specified by the user, we put
   # initPar to the final mcmc points in "object" and we don't do any more burn in.
-  tmpObject <- smcmc(object = object, 
-                     initPar = drop( tail(object@chains, 1) ),
-                     niter = niter,
-                     nsim = nsim,
-                     propCov = propCov, 
-                     burn = 0,
-                     priorFun = object@priorFun,
-                     targetRate = targetRate,
-                     recompute = recompute,
-                     multicore = multicore,
-                     ncores = ncores,
-                     cluster = cluster,
-                     control = ctrl,
-                     ...)
-  
-  avgAcceptRate <- (object@accRate*object@niter + tmpObject@accRate*tmpObject@niter) / (object@niter + tmpObject@niter)
+  tmpObj <- smcmc(object = object, 
+                  initPar = aaply(object@chains, 3, tail, n = 1),
+                  niter = niter,
+                  nsim = nsim,
+                  propCov = propCov, 
+                  burn = 0,
+                  nchains = object@nchains,
+                  priorFun = priorFun,
+                  targetRate = targetRate,
+                  recompute = recompute,
+                  multicore = multicore,
+                  ncores = ncores,
+                  cluster = cluster,
+                  control = ctrl,
+                  ...)
+
+  # Averaging old and new acceptance rate
+  accRate <- (object@accRate * object@niter + tmpObj@accRate * tmpObj@niter) / (object@niter + tmpObj@niter)
   
   return(new(   "smcmc",
-                tmpObject,
+                tmpObj,
                 
                 initPar = object@initPar,   # Resetting the values of these two param, so we don't lose information  
                 burn = as.integer(object@burn),
                 
                 niter = as.integer(object@niter + niter),
                 
-                accRate = avgAcceptRate, 
-                chains = rbind(object@chains, tmpObject@chains),
-                llkChain = append(object@llkChain, tmpObject@llkChain)
+                accRate = accRate, 
+                chains = abind(object@chains, tmpObj@chains, along = 1),
+                llkChain = rbind(object@llkChain, tmpObj@llkChain),
+                parStore = abind(object@parStore, tmpObj@parStore, along = 1),
+                llkStore = rbind(object@llkStore, tmpObj@llkStore)
   ))
 }
 
