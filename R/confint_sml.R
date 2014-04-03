@@ -13,10 +13,10 @@
 #' @export
 #' 
 
-confint.sml <- function(object, parm, level = 0.95, lag = 10, ...)
+confint.sml <- function(object, parm, level = 0.95, burnMean = 0, burnCov = 0, ...)
 {
   # Code copies from stats::confint.default()
-  cf <- coef.sml(object, lag = lag, ...)
+  cf <- coef.sml(object, burn = burnMean, ...)
   pnames <- names(cf)
   if (missing(parm)) 
     parm <- pnames
@@ -27,7 +27,7 @@ confint.sml <- function(object, parm, level = 0.95, lag = 10, ...)
   pct <- paste(format(100 * a, trim = TRUE, scientific = FALSE, digits = 3), "%")
   fac <- qnorm(a)
   ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, pct))
-  ses <- sqrt(diag(vcov.sml(object, ...)))[parm]
+  ses <- sqrt(diag(vcov.sml(object, burn = burnCov, ...)))[parm]
   ci[] <- cf[parm] + ses %o% fac
   ci
 }

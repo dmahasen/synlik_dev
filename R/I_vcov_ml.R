@@ -12,76 +12,24 @@
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>
 #' 
 
-.vcov.ml <- function(llk, parMat, nreps = 1000, boot = TRUE, ...)
+.vcov.ml <- function(llk, parMat, nreps = 1000, boot = TRUE, burn = 0, quant = 0.1, ...)
 { 
-  npar <- ncol(parMat)
-  linPar <- 1 : (npar+1)
+
+  # Discarding initial part of the chains
+  if( burn > 0 ){
+    llk <- llk[-(1:burn)]
+    parMat <- parMat[-(1:burn), , drop = FALSE]
+  }
   
-  # Non finite loglikelihoods are excluded
-  good <- which( is.finite(llk) )
-  parMat <- parMat[good, ]
-  llk <-    llk[ good ]
-  nval <- length(llk)
-  
-  # Creating model matrix and weights
-  X <- .quadModMat(parMat)
-  W <- exp(llk - max(llk))
-  
-  # Regressing estimated log-likelihoods of parameters
-  fit <- lm(llk ~ -1 + X, weights = W)
-  meanCoef <- coef(fit)[ -linPar ]
-  ncoef <- length(meanCoef)
-  
-  # Extract hessian and its eigen-values
-  hess <- - .extractHessian(meanCoef, npar)
-  eig <- eigen(hess, only.values = TRUE)$values
-  
-  ###### Start of PD correction
-  # If hessian is not PD, bootstrap or simulate using asymptotic covariance to get it PD (hopefully).
-  # Our final estimate is the positive definite hessian with the lowest conditioning number.
-  if( any(eig < 0) )
-  {
-    message("The estimated Hessian of the log-lik is not negative definite, I will try to bootstrap it.")
-    
-    # Resampled coefficients will be stored here by row
-    coefMat <- matrix(NA, nreps, ncoef)
-    
-    # Using boostrap
-    if(boot)
-    {
-      for(ii in 1:nreps)
-      {
-        index <- sample(1:nval, nval, replace = TRUE)
-        
-        tmpX <- X[index, ]
-        tmpllk  <- llk[index]
-        tmpW <- exp( tmpllk - max(tmpllk) )
-        
-        coefMat[ii, ] <- lm.wfit(x = tmpX, y = tmpllk, w = tmpW)$coefficients[ -linPar ]
-      }
-    } else {
-      # Using asymptotic covariance
-      coefMat <- .rmvn(nreps, mu = meanCoef, sigma = vcov(fit)[ -linPar, -linPar, drop = FALSE ]) 
-    }
-    
-    # Extract simulated hessian and their conditioning number
-    coefMat <- split(t(coefMat), rep(1:nreps, each = ncoef))
-    hess <- lapply(coefMat, function(inMat) - .extractHessian(inMat, npar))
-    cond <- sapply(hess, 
-                   function(inHess){ 
-                     eig <- eigen(inHess, only.values = TRUE)$values
-                     if( all(eig > 0) ){ return( max(eig) / min(eig) ) } else { return( NA ) } 
-                   })
-    
-    if( all(is.na(cond)) ) stop("Cannot get a positive definite negative Hessian.")
-    
-    # Use hessian with lowest conditioning number
-    hess <- hess[[ which.min(cond) ]]
-  } 
-  ###### End of PD correction
+  hess <- .quadLikWeighRegr(llk = llk, 
+                            parMat = parMat, 
+                            nreps = nreps, 
+                            boot = boot,
+                            quant = quant,
+                            ...)$hessian 
   
   # Getting covariance, standard errors and confidence intervals
-  covar <- .qrInverse(hess)
+  covar <- .qrInverse(-hess)
   rownames(covar) <- colnames(covar) <- colnames(parMat)
   
   return(covar) 

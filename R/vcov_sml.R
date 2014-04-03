@@ -13,15 +13,19 @@
 #' @export
 #' 
 
-vcov.sml <- function(object, nreps = 1000, boot = TRUE, ...)
+vcov.sml <- function(object, nreps = 1000, boot = TRUE, burn = 0, quant = 0.1, ...)
 { 
+  
   # Including only parameters that were estimated
   varPar <- diag(object@initCov) > 0
   
   covar <- .vcov.ml(llk = object@simLogLik, 
                     parMat = object@simPar[ , varPar],
                     nreps = nreps, 
-                    boot = boot, ...)
+                    boot = boot, 
+                    burn = burn,
+                    quant = quant,
+                    ...)
   
   rownames(covar) <- colnames(covar) <- names(object@param)[ varPar ]
   

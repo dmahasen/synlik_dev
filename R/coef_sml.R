@@ -9,9 +9,12 @@
 #' @export
 #' 
 
-coef.sml <- function(object, lag = 10, ...)
+coef.sml <- function(object, burn = 0, ...)
 {
-  est <- colMeans( tail(object@estim, min(object@niter, lag)) )
+  if( burn > 0 ) object@estim <- object@estim[-(1:burn), ] 
+  
+  est <- colMeans( object@estim )
+  
   names(est) <- names(object@param)
   
   return(est)
