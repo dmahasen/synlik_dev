@@ -23,6 +23,7 @@ Imports:
     doSNOW
 Suggests: 
     knitr,
+    testthat,
     stabledist
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr

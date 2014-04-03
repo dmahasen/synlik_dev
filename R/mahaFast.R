@@ -45,7 +45,7 @@
 mahaFast <- function(X, mu, sigma, isChol = FALSE)
 {
   if( !is.matrix(X) ) X <- matrix(X, 1, length(X))
-  
+    
   drop(.Call( "mahaCpp", 
               X_ = X, 
               mu_ = mu, 

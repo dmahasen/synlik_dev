@@ -150,6 +150,8 @@ synlik <- function(...)
 {
   if(!is(object, "smcmc")) stop("object has to be of class \"smcmc\" ")
   
+  if( !is.matrix(object@initPar) ) object@initPar <- t(object@initPar)
+  
   errors <- character()
   
   if(length(object@initPar) == 0) errors <- c(errors, "length(initPar) should be > 0")
@@ -229,7 +231,7 @@ synlik <- function(...)
 #' plot(ricker_sl)       
 #'
 setClass("smcmc",
-         representation( initPar = "numericORmatrix",
+         representation( initPar = "matrix",
                          niter = "integer",
                          nsim = "integer",
                          propCov = "matrix",
@@ -249,7 +251,7 @@ setClass("smcmc",
                          parStore = "array",
                          llkStore = "matrix"
          ),
-         prototype = prototype(initPar = numeric(),
+         prototype = prototype(initPar = matrix( , 0, 0),
                                niter = 0L,
                                nsim = 0L, 
                                propCov = matrix( , 0, 0),

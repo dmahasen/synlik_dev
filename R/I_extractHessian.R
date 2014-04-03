@@ -1,5 +1,5 @@
 
-.extractHessian <- cmpfun(function(secondDeriv, nPar)
+.extractHessian <- cmpfun(function(quadCoef, nPar)
 {
   hessian <- matrix(NA, nPar, nPar)
   
@@ -20,9 +20,11 @@
     }
   } 
   
+  # Put derivatives into the hessian.
+  # Diagonal multiplied by 2
   for(iRow in 1:nPar)
     for(iCol in iRow:nPar)
-      hessian[iRow, iCol] <- hessian[iCol, iRow] <- secondDeriv[ indexes[iRow, iCol] ]  
+      hessian[iRow, iCol] <- hessian[iCol, iRow] <- quadCoef[ indexes[iRow, iCol] ] * ifelse(iRow == iCol, 2, 1) 
   
   return( hessian )
   

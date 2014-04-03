@@ -112,9 +112,12 @@ mcmc <- function(likFun,
   llkChain <- do.call("cbind", lapply(out, "[[", "llkChain")) 
   llkStore <- do.call("cbind", lapply(out, "[[", "llkStore"))
   
-  return( list("accRate" = accRate, 
+  return( list("initPar" = initPar,
+               "propCov" = propCov,
+                
+               "accRate" = accRate, 
                "chains" = chains, 
-               "llkChain" = llkChain, 
+               "llkChain" = llkChain,
                "parStore" = parStore,
                "llkStore" = llkStore) )
 }
