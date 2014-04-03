@@ -131,7 +131,7 @@
     # (Optionally) save the object to file
     if( !is.null(ctrl$saveFile) && !(ii %% ctrl$saveFreq) ){ 
       
-      out <- list("accRate" = accept / niter, "chains"  = mcmcSample, "llkChain" = llkChain)
+      out <- list("accRate" = accept / ii, "chains"  = mcmcSample, "llkChain" = llkChain)
       
       save(file = ctrl$saveFile, out)   
     }

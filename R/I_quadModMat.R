@@ -5,24 +5,18 @@
 {
   nPar <- ncol(X)
   
-  # Center X
-  X <- t( t(X) - colMeans(X) )
-
-  # Add quadratic terms
-  mod <- cbind(1, X, (X^2)/2)
-  
-  # Add interactions
+  M <- cbind(1, X, X ^ 2)
+     
+  # Creating all mixed terms
   if(nPar > 1){
     
-    comb <- t( combn(nPar, 2) )
+    comb <- combn(nPar, 2)
     
-    for(jj in 1:nrow(comb)){ 
-      
-      mod <- cbind(mod, X[ , comb[jj, 1]] * X[ , comb[jj, 2]]) 
-      
-    }
+    tmp <- lapply(1:ncol(comb), function(jj) X[ , comb[1, jj]] * X[ , comb[2, jj]])
+    
+    M <- cbind(M, do.call("cbind", tmp))
     
   }
   
-  return( mod ) 
+  return( M ) 
 } 

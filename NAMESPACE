@@ -8,7 +8,7 @@ importFrom(methods)
 
 importFrom(abind, "abind")
 
-importFrom(plyr, "alply")
+importFrom(plyr, "alply", "laply", "aaply")
 
 importFrom(doSNOW, "registerDoSNOW")
 
@@ -21,10 +21,7 @@ importFrom(parallel, "makeCluster")
 importFrom(parallel, "stopCluster")
 importFrom(parallel, "detectCores")
 
-importFrom(stats, "simulate")
-importFrom(stats, "coef")
-importFrom(stats, "vcov")
-importFrom(stats, "confint")
+importFrom(stats, "simulate", "coef", "vcov", "confint", "logLik")
 
 importFrom(graphics, "plot")
 
