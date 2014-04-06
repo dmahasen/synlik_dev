@@ -20,7 +20,8 @@ Imports:
     parallel,
     abind,
     plyr,
-    doSNOW
+    doSNOW,
+    MASS
 Suggests: 
     knitr,
     testthat,

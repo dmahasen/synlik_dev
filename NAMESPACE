@@ -12,6 +12,8 @@ importFrom(plyr, "alply", "laply", "aaply")
 
 importFrom(doSNOW, "registerDoSNOW")
 
+importFrom(MSS, "rlm")
+
 importFrom(Rcpp)
 
 importFrom(parallel, "clusterApply")

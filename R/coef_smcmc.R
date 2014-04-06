@@ -24,6 +24,7 @@ coef.smcmc <- function(object, method = "bayes", nreps = 1000, boot = TRUE, quan
   
   mcmcObj <- list("initPar" = object@initPar,
                   "propCov" = object@propCov, 
+                  "chains"  = object@chains,
                   "llkStore" = object@llkStore,
                   "parStore" = object@parStore)
   
