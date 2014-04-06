@@ -53,7 +53,7 @@ coef.mcmc <- function(object,
      
   } else {
     
-    parEstim <- colMeans( aaply(object$parStore, 3, colMeans) )
+    parEstim <- colMeans( aaply(object$chains, 3, colMeans, .drop = FALSE) )
     
   }
   
