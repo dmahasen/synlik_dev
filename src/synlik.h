@@ -19,9 +19,7 @@ RcppExport SEXP cleanStats(SEXP inMat);
 
 RcppExport SEXP checkBoundsCpp(SEXP theMean_, SEXP cholFact_, SEXP toCheck_, SEXP upper_, SEXP lower_, SEXP output_);
 
-RcppExport SEXP mahaCpp(SEXP X, SEXP mu, SEXP sigma, SEXP isChol);
-
-RcppExport SEXP dmvnCpp(SEXP X_, SEXP mu_, SEXP sigma_, SEXP log_, SEXP isChol_);
+RcppExport SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_, SEXP kum2_);
 
 /*
  * Simulators

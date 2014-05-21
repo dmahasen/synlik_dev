@@ -17,8 +17,7 @@
 #' @export
 #'
 
-findMode <- function(X, init = NULL, decay = 0.5, method = "BFGS", 
-                     sadTol = 1e-6, marginal = FALSE, ...)
+findMode <- function(X, init = NULL, decay = 0.5, method = "BFGS", mixMethod = "mse", sadTol = 1e-6, ...)
 {
   switch(class(X),
          "matrix"  = theData <- X,
@@ -41,8 +40,10 @@ findMode <- function(X, init = NULL, decay = 0.5, method = "BFGS",
     stopifnot( is.vector(init), length(init) == ncol(theData) ) 
   }
   
-  objFun  <- function(x) -dsaddle(y = as.numeric(x), X = theData, tol = sadTol, decay = decay, log = TRUE)$llk
-  objGrad <- function(x) -dsaddle(y = as.numeric(x), X = theData, tol = sadTol, decay = decay, deriv = TRUE)$grad
+  objFun  <- function(x) -dsaddle(y = as.numeric(x), X = theData, tol = sadTol, decay = decay, log = TRUE, mixMethod = mixMethod)$llk
+  
+  objGrad <- function(x) -dsaddle(y = as.numeric(x), X = theData, tol = sadTol, decay = decay, deriv = TRUE, mixMethod = mixMethod)$grad
+  
   
   optOut <- optim(par = init, fn = objFun, gr = objGrad, method = method, ...)
   

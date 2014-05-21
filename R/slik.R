@@ -34,6 +34,57 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   
 }
 
+####
+# INTERNAL
+####
 
+.slik <- function(object, param, nsim, saddle = FALSE, decay = 0.5, multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, ...) 
+{
+  
+  if(!is(object, "synlik")) stop("object has to be of class \"synlik\" ")
+  
+  # Reduce the object to "synlik" so that I avoid moving around all the additional slots of the "synMaxlik" class
+  if( !class(object)[[1]] != "synlik" ) object <- as(object, "synlik")
+  
+  if( !is.vector(param) ) stop("param should be a numeric vector.")
+  
+  # Simulating from model
+  if(multicore)
+  {
+    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores)
+    cluster <- tmp$cluster
+    ncores <- tmp$ncores
+    clusterCreated <- tmp$clusterCreated
+    
+    coresSchedule <- c( rep(floor(nsim / ncores), ncores - 1), floor(nsim / ncores) + nsim %% ncores)
+    
+    simulData <- clusterApply(
+      cluster, 
+      coresSchedule, 
+      function(input, ...)
+      {
+        .simulate.synlik(object, param = param, nsim = input, stats = TRUE, clean = TRUE, verbose = FALSE, ...)
+      } 
+      , ...
+    )
+    
+    simulData <- do.call(rbind, simulData)
+    
+    if(clusterCreated) cluster <- stopCluster(cluster)
+    
+  } else {
+    simulData <- .simulate.synlik(object, param = param, nsim = nsim, stats = TRUE, clean = TRUE, verbose = FALSE, ...) 
+  }
+  
+  if(nrow(simulData) < nsim / 3) warning(paste(nsim - nrow(simulData), "out of", nsim, "statistics vectors", "contain NAs and will not be used"))
+  
+  # Transforming the observation into stats
+  summaries <- object@summaries
+  obsStats <- if( !is.null(summaries) ) summaries(x = object@data, extraArgs = object@extraArgs, ...) else object@data
+  
+  # Calculating log-likelihood
+  return( .empDens(y = obsStats, X = simulData, saddle = saddle, decay = decay, tol = 1e-6, log = TRUE) )
+  
+}
 
 
