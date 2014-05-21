@@ -1,3 +1,4 @@
+
 # Calculating log-likelihood
 .empDens <- function(y, X, saddle, decay, tol = 1e-6, log = TRUE)
 {
@@ -18,7 +19,7 @@
     if( length(tmp$lowVar) ) y <- y[-tmp$lowVar]
     
     rss <- sum( (tmp$E%*%as.vector(y-tmp$mY))^2 )
-    llk <- -rss/2 - tmp$half.ldet.V
+    llk <- -rss/2 - tmp$half.ldet.V - log(2 * pi) * length(y) / 2
     mix <- 0
     
   }
