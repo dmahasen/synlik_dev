@@ -2,8 +2,8 @@
 \alias{dsaddle}
 \title{Empirical saddlepoint density}
 \usage{
-  dsaddle(y, X, tol = 1e-06, decay = 0.5, deriv = FALSE,
-    log = FALSE)
+dsaddle(y, X, tol = 1e-06, decay = 0.5, deriv = FALSE,
+  mixMethod = "mse", log = FALSE)
 }
 \arguments{
   \item{y}{Point at which the SPA is evaluated (d
@@ -26,17 +26,17 @@
   returned.}
 }
 \value{
-  A list with entries: \itemize{ \item{ \code{llk} }{The
-  value of the empirical saddlepoint at y;} \item{
-  \code{mix} }{The mixture of normal-saddlepoint used (1
-  means only saddlepoint);} \item{ \code{grad} }{The
-  gradient of the log-density at y (optional);} }
+A list with entries: \itemize{ \item{ \code{llk} }{The
+value of the empirical saddlepoint at y;} \item{ \code{mix}
+}{The mixture of normal-saddlepoint used (1 means only
+saddlepoint);} \item{ \code{grad} }{The gradient of the
+log-density at y (optional);} }
 }
 \description{
-  Gives a pointwise evaluation of the empirical saddlepoint
-  and optionally of its gradient at position y
+Gives a pointwise evaluation of the empirical saddlepoint
+and optionally of its gradient at position y
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com> and Simon Wood.
+Matteo Fasiolo <matteo.fasiolo@gmail.com> and Simon Wood.
 }
 

@@ -2,11 +2,10 @@
 \alias{checkCoverage.synMaxlik}
 \title{Estimated coverage of the synMaxlik optimization rountine}
 \usage{
-  checkCoverage.synMaxlik(object, nrep, niter, nsim,
-    initCov, initPar = object@param, addRegr = TRUE,
-    constr = list(), control = list(), multicore = FALSE,
-    ncores = min(detectCores() - 1, nrep), cluster = NULL,
-    verbose = FALSE, ...)
+checkCoverage.synMaxlik(object, nrep, niter, nsim, initCov,
+  initPar = object@param, addRegr = TRUE, constr = list(),
+  control = list(), multicore = FALSE, ncores = min(detectCores() - 1,
+  nrep), cluster = NULL, verbose = FALSE, ...)
 }
 \arguments{
   \item{object}{("synlik") object.}
@@ -63,12 +62,12 @@
   everything they need.}
 }
 \value{
-  object
+object
 }
 \description{
-  Estimated coverage of the synMaxlik optimization rountine
+Estimated coverage of the synMaxlik optimization rountine
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 

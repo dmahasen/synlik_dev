@@ -2,8 +2,8 @@
 \alias{findMode}
 \title{Finding the mode of the empirical saddelpoint density}
 \usage{
-  findMode(X, init = NULL, decay = 0.5, method = "BFGS",
-    sadTol = 1e-06, marginal = FALSE, ...)
+findMode(X, init = NULL, decay = 0.5, method = "BFGS",
+  mixMethod = "mse", sadTol = 1e-06, ...)
 }
 \arguments{
   \item{X}{n by d matrix containing the data.}
@@ -27,16 +27,16 @@
   optimization routine stats::optim.}
 }
 \value{
-  A list where \code{mode} is the location of mode of the
-  empirical saddlepoint density, while the other entries
-  are the same as for stats::optim.
+A list where \code{mode} is the location of mode of the
+empirical saddlepoint density, while the other entries are
+the same as for stats::optim.
 }
 \description{
-  Given a sample from a d-dimensinal distribution the
-  routine find the mode of the corresponding empirical
-  saddlepoint density.
+Given a sample from a d-dimensinal distribution the routine
+find the mode of the corresponding empirical saddlepoint
+density.
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>.
+Matteo Fasiolo <matteo.fasiolo@gmail.com>.
 }
 

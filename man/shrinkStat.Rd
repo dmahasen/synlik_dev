@@ -2,8 +2,8 @@
 \alias{shrinkStat}
 \title{Creates a summaries function using ridge regression or lasso}
 \usage{
-  shrinkStat(object, nsim, mu, sigma, type = "ridge",
-    constr = list(), clean = TRUE, verbose = TRUE, ...)
+shrinkStat(object, nsim, mu, sigma, type = "ridge", constr = list(),
+  clean = TRUE, verbose = TRUE, ...)
 }
 \arguments{
   \item{object}{An object of class "synlik".}
@@ -21,18 +21,18 @@
   object@simulator and object@summaries.}
 }
 \value{
-  A function that transforms simulated data in summary
-  statistics. This function can by used as object@summaries
-  function in an object of class "synlik".
+A function that transforms simulated data in summary
+statistics. This function can by used as object@summaries
+function in an object of class "synlik".
 }
 \description{
-  Fearnhead and Prangle (2012) proposed to use posterior
-  expected values of the parameters as summary statistics.
-  Here this goal is approximated by using fitted values of
-  the parameters (obtained by ridge regression) as summary
-  statistics.
+Fearnhead and Prangle (2012) proposed to use posterior
+expected values of the parameters as summary statistics.
+Here this goal is approximated by using fitted values of
+the parameters (obtained by ridge regression) as summary
+statistics.
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>.
+Matteo Fasiolo <matteo.fasiolo@gmail.com>.
 }
 

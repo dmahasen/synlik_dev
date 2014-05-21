@@ -1,7 +1,12 @@
+\docType{methods}
 \name{plot-smcmc}
 \alias{plot,smcmc,missing-method}
 \alias{plot-smcmc}
 \title{Method for plotting an object of class \code{smcmc}.}
+\usage{
+\S4method{plot}{smcmc,missing}(x, trans = NULL, addPlot1 = NULL,
+  addPlot2 = NULL, ...)
+}
 \arguments{
   \item{x}{An object of class \code{smcmc}.}
 
@@ -23,11 +28,8 @@
   \item{...}{additional arguments to be passed to the
   plotting functions.}
 }
-\value{
-  NULL
-}
 \description{
-  Method for plotting an object of class \code{smcmc}.
+Method for plotting an object of class \code{smcmc}.
 }
 \examples{
 data(ricker_smcmc)
@@ -50,6 +52,6 @@ plot(ricker_smcmc,
      addPlot2 = "addline2")
 }
 \seealso{
-  \code{\link{smcmc-class}}, \code{\link{plot}}.
+\code{\link{smcmc-class}}, \code{\link{plot}}.
 }
 

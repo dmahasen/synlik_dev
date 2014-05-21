@@ -150,6 +150,19 @@ orderDist <- function(x,z,np=3,diff=1) {
 } 
 
 
+# Number of turning point in a matrix "X" by row
+
+.nturn <- function( X )
+{
+  N <- ncol(X)
+  
+  tmp <- sign( X[ , 2:N, drop = F] -  X[ , 1:(N-1), drop = F] )
+  
+  return( rowSums( abs(tmp[ , 2:(N-1), drop = F] - tmp[ , 1:(N-2), drop = F]) ) / 2.0 )
+  
+}
+
+
 
 
 ##########################

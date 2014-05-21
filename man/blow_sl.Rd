@@ -4,10 +4,10 @@
 \alias{blow_smcmc}
 \title{Blowfly model}
 \description{
-  \code{synlik} object containing the blowfly model
-  proposed by Wood (2010).  The main components are the
-  simulator \link{blowSimul} and the statistics
-  \code{blowStats}, described in the same reference.
+\code{synlik} object containing the blowfly model proposed
+by Wood (2010).  The main components are the simulator
+\link{blowSimul} and the statistics \code{blowStats},
+described in the same reference.
 }
 \examples{
 data(blow_sl)
@@ -34,14 +34,14 @@ slik(blow_sl,
      nsim    = 1e3)
 }
 \author{
-  Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
+Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
 }
 \references{
-  Simon N Wood. Statistical inference for noisy nonlinear
-  ecological dynamic systems. Nature, 466(7310):1102--1104,
-  2010.
+Simon N Wood. Statistical inference for noisy nonlinear
+ecological dynamic systems. Nature, 466(7310):1102--1104,
+2010.
 }
 \seealso{
-  \link{blowSimul}
+\link{blowSimul}
 }
 

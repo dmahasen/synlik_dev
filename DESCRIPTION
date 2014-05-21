@@ -21,7 +21,8 @@ Imports:
     abind,
     plyr,
     doSNOW,
-    MASS
+    MASS,
+    mvnfast
 Suggests: 
     knitr,
     testthat,

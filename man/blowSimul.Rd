@@ -2,7 +2,7 @@
 \alias{blowSimul}
 \title{Simulates from the blowfly model}
 \usage{
-  blowSimul(param, nsim, extraArgs, ...)
+blowSimul(param, nsim, extraArgs, ...)
 }
 \arguments{
   \item{param}{vector of log-parameters: delta, P, N0,
@@ -23,11 +23,11 @@
   not used.}
 }
 \value{
-  A matrix \code{nsim} by \code{nObs}, where each row is a
-  simulated path.
+A matrix \code{nsim} by \code{nObs}, where each row is a
+simulated path.
 }
 \description{
-  Simulator for the blowfly model proposed by Wood (2010).
+Simulator for the blowfly model proposed by Wood (2010).
 }
 \examples{
 tmp <- blowSimul(param = log( c( "delta" = 0.16, "P" = 6.5, "N0" = 400,
@@ -37,20 +37,20 @@ tmp <- blowSimul(param = log( c( "delta" = 0.16, "P" = 6.5, "N0" = 400,
 matplot(t(tmp), type = 'l', ylab = "Y", xlab = "Time")
 }
 \author{
-  Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
+Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
 }
 \references{
-  Simon N Wood. Statistical inference for noisy nonlinear
-  ecological dynamic systems. Nature, 466(7310):1102--1104,
-  2010. \cr \cr Brillinger, D. R., J. Guckenheimer, P.
-  Guttorp, and G. Oster. 1980.  Empirical modelling of
-  population time series data: the case of age and density
-  dependent vital rates. Lectures on Mathematics in the
-  Life Sciences13:65-90.  \cr \cr Nicholson, A. J. 1957.
-  The self-adjustment of populations to change.  Cold
-  Spring Harbor Symposia on Quantitative Biology22:153-173.
+Simon N Wood. Statistical inference for noisy nonlinear
+ecological dynamic systems. Nature, 466(7310):1102--1104,
+2010. \cr \cr Brillinger, D. R., J. Guckenheimer, P.
+Guttorp, and G. Oster. 1980.  Empirical modelling of
+population time series data: the case of age and density
+dependent vital rates. Lectures on Mathematics in the Life
+Sciences13:65-90.  \cr \cr Nicholson, A. J. 1957. The
+self-adjustment of populations to change.  Cold Spring
+Harbor Symposia on Quantitative Biology22:153-173.
 }
 \seealso{
-  \link{blow_sl}
+\link{blow_sl}
 }
 

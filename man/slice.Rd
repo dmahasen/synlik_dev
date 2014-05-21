@@ -2,10 +2,9 @@
 \alias{slice}
 \title{Plot slices of the synthetic log-likelihood.}
 \usage{
-  slice(object, ranges, nsim, param = object@param,
-    pairs = FALSE, draw = TRUE, trans = NULL,
-    multicore = FALSE, ncores = detectCores() - 1,
-    cluster = NULL, ...)
+slice(object, ranges, nsim, param = object@param, pairs = FALSE,
+  draw = TRUE, trans = NULL, multicore = FALSE, ncores = detectCores() -
+  1, cluster = NULL, ...)
 }
 \arguments{
   \item{object}{\code{synlik} object.}
@@ -52,12 +51,12 @@
   \code{slik()}, see \code{\link{slik}}.}
 }
 \value{
-  Either a vector or matrix of log-synthetic likelihood
-  estimates, depending on whether \code{length(parNames)
-  ==} 1 or 2.  These are returned invisibly.
+Either a vector or matrix of log-synthetic likelihood
+estimates, depending on whether \code{length(parNames) ==}
+1 or 2.  These are returned invisibly.
 }
 \description{
-  Plot slices of the synthetic log-likelihood.
+Plot slices of the synthetic log-likelihood.
 }
 \examples{
 data(ricker_sl)
@@ -82,6 +81,6 @@ slice(object = ricker_sl,
 }
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 

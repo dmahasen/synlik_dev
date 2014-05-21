@@ -2,7 +2,7 @@
 \alias{rickerSimul}
 \title{Simulates from the ricker model}
 \usage{
-  rickerSimul(param, nsim, extraArgs, ...)
+rickerSimul(param, nsim, extraArgs, ...)
 }
 \arguments{
   \item{param}{vector of log-parameters: logR, logSigma,
@@ -26,15 +26,15 @@
   not used.}
 }
 \value{
-  A matrix \code{nsim} by \code{nObs}, where each row is a
-  simulated path.
+A matrix \code{nsim} by \code{nObs}, where each row is a
+simulated path.
 }
 \description{
-  Simulator for the stochastic Ricker model, as described
-  by Wood (2010). The observations are Y_t ~ Pois(Phi *
-  N_t), and the dynamics of the hidden state are given by
-  N_t = r * N_\{t-1\} * exp( -N_\{t-1\} + e_t ), where e_t
-  ~ N(0, Sigma^2).
+Simulator for the stochastic Ricker model, as described by
+Wood (2010). The observations are Y_t ~ Pois(Phi * N_t),
+and the dynamics of the hidden state are given by N_t = r *
+N_\{t-1\} * exp( -N_\{t-1\} + e_t ), where e_t ~ N(0,
+Sigma^2).
 }
 \examples{
 tmp <- rickerSimul(c(3.8, -1.2, 2.3), nsim = 2, extraArgs = list("nObs" = 50, "nBurn" = 200))
@@ -49,14 +49,14 @@ plot(tmp[1, ], type = 'l', ylab = "Y", xlab = "Time")
 plot(tmp[2, ], type = 'l', ylab = "Y", xlab = "Time")
 }
 \author{
-  Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
+Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
 }
 \references{
-  Simon N Wood. Statistical inference for noisy nonlinear
-  ecological dynamic systems. Nature, 466(7310):1102--1104,
-  2010. \cr \cr
+Simon N Wood. Statistical inference for noisy nonlinear
+ecological dynamic systems. Nature, 466(7310):1102--1104,
+2010. \cr \cr
 }
 \seealso{
-  \link{ricker_sl}
+\link{ricker_sl}
 }
 

@@ -2,8 +2,8 @@
 \alias{confint.sml}
 \title{Parameters covariance matrix for "sml" objects}
 \usage{
-  \method{confint}{sml} (object, parm, level = 0.95,
-    lag = 10, ...)
+\method{confint}{sml}(object, parm, level = 0.95, burnMean = 0,
+  burnCov = 0, ...)
 }
 \arguments{
   \item{object}{a fitted model object of class "sml".}
@@ -20,10 +20,10 @@
   object@niter.}
 }
 \description{
-  Computes confidence intervals for one or more parameters
-  in a fitted model of class "sml".
+Computes confidence intervals for one or more parameters in
+a fitted model of class "sml".
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 

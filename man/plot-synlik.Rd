@@ -1,21 +1,22 @@
+\docType{methods}
 \name{plot-synlik}
 \alias{plot,synlik,missing-method}
 \alias{plot-synlik}
 \title{Method for plotting an object of class \code{synlik}.}
+\usage{
+\S4method{plot}{synlik,missing}(x, ...)
+}
 \arguments{
   \item{x}{An object of class \code{synlik}.}
 
   \item{...}{additional arguments to be passed to
   \code{object@plotFun}.}
 }
-\value{
-  NULL
-}
 \description{
-  It basically calls the slot \code{object@plotFun} with
-  input \code{object@data}, if it has been provided by the
-  user. Otherwise it tries to use the \code{plot(x =
-  object@data, y, ...)} generic.
+It basically calls the slot \code{object@plotFun} with
+input \code{object@data}, if it has been provided by the
+user. Otherwise it tries to use the \code{plot(x =
+object@data, y, ...)} generic.
 }
 \examples{
 data(ricker_sl)
@@ -28,9 +29,9 @@ ricker_sl@plotFun <- NULL
 plot(ricker_sl)
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 \seealso{
-  \code{\link{synlik-class}}, \code{\link{plot}}.
+\code{\link{synlik-class}}, \code{\link{plot}}.
 }
 

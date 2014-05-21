@@ -2,7 +2,7 @@
 \alias{nlar}
 \title{Estimate non-linear autoregressive coefficients}
 \usage{
-  nlar(x, lag, power)
+nlar(x, lag, power)
 }
 \arguments{
   \item{x}{a matrix. Each column contains a replicate
@@ -13,12 +13,12 @@
   \item{power}{vector of powers, for rhs terms.}
 }
 \value{
-  a matrix where each column contains the coefficients for
-  a different replicate.
+a matrix where each column contains the coefficients for a
+different replicate.
 }
 \description{
-  Function that, give time series data, transforms them
-  into summary statistics using polynomial autoregression.
+Function that, give time series data, transforms them into
+summary statistics using polynomial autoregression.
 }
 \examples{
 library(synlik)
@@ -53,7 +53,7 @@ library(synlik)
   as.numeric(beta[,k]);beta0;beta0-as.numeric(beta[,k])
 }
 \author{
-  Simon N. Wood, maintainer Matteo Fasiolo
-  <matteo.fasiolo@gmail.com>.
+Simon N. Wood, maintainer Matteo Fasiolo
+<matteo.fasiolo@gmail.com>.
 }
 

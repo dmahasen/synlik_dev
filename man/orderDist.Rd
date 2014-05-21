@@ -2,7 +2,7 @@
 \alias{orderDist}
 \title{Summarize marginal distribution of (differenced) series.}
 \usage{
-  orderDist(x, z, np = 3, diff = 1)
+orderDist(x, z, np = 3, diff = 1)
 }
 \arguments{
   \item{x}{a matrix. Each column contains a replicate
@@ -15,13 +15,13 @@
   \item{diff}{order of differencing (zero for none).}
 }
 \value{
-  a matrix where each column contains the coefficients for
-  a different replicate.
+a matrix where each column contains the coefficients for a
+different replicate.
 }
 \description{
-  Summarizes (difference) distribution of replicate series,
-  by regressing ordered differenced series on a reference
-  series (which might correspond to observed data).
+Summarizes (difference) distribution of replicate series,
+by regressing ordered differenced series on a reference
+series (which might correspond to observed data).
 }
 \examples{
 library(synlik)
@@ -38,7 +38,7 @@ xd <- sort(xd);xd <- xd - mean(xd)
 lm(xd~zd+I(zd^2)+I(zd^3)-1)
 }
 \author{
-  Simon N. Wood, maintainer Matteo Fasiolo
-  <matteo.fasiolo@gmail.com>.
+Simon N. Wood, maintainer Matteo Fasiolo
+<matteo.fasiolo@gmail.com>.
 }
 

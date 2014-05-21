@@ -2,7 +2,7 @@
 \alias{meanShift}
 \title{Mean-shift mode seeking algorithm}
 \usage{
-  meanShift(X, init, H, tol = 1e-06, traj = FALSE)
+meanShift(X, init, H, tol = 1e-06, traj = FALSE)
 }
 \arguments{
   \item{X}{n by d matrix containing the data.}
@@ -26,18 +26,18 @@
   algorithms at the i-th iteration.}
 }
 \value{
-  A list where \code{estim} is a d-dimensional vector
-  containing the last position of the algorithm, while
-  \code{allTraj} is a matrix with d-colums representing the
-  trajectory of the algorithm along each dimension. If
-  \code{traj == FALSE} the whole trajectory is not stored
-  and \code{allTraj = NULL}.
+A list where \code{estim} is a d-dimensional vector
+containing the last position of the algorithm, while
+\code{allTraj} is a matrix with d-colums representing the
+trajectory of the algorithm along each dimension. If
+\code{traj == FALSE} the whole trajectory is not stored and
+\code{allTraj = NULL}.
 }
 \description{
-  Given a sample from a d-dimensional distribution, an
-  initialization point and a bandwidth the algorithm finds
-  the nearest mode of the corresponding Gaussian kernel
-  density.
+Given a sample from a d-dimensional distribution, an
+initialization point and a bandwidth the algorithm finds
+the nearest mode of the corresponding Gaussian kernel
+density.
 }
 \examples{
 # 2 dimensional example
@@ -50,6 +50,6 @@ points(0, 0, col = 3, pch = 3, lwd = 3) # true mode
 points(out$estim[1], out$estim[2], col = 4, pch = 3, lwd = 3) # final estimate
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>.
+Matteo Fasiolo <matteo.fasiolo@gmail.com>.
 }
 

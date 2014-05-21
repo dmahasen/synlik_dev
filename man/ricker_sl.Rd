@@ -4,14 +4,13 @@
 \alias{ricker_smcmc}
 \title{Ricker model}
 \description{
-  \code{ricker_sl} is \code{synlik} object containing the
-  stochastic Ricker model, \code{ricker_smcmc} is a
-  \code{smcmc} object which also contains the results of
-  some MCMC iterations. The model is described
-  \link{rickerSimul} and in Wood (2010).  The main
-  components of the object are the simulator
-  \link{rickerSimul} and the statistics \code{rickerStats},
-  described in the same reference.
+\code{ricker_sl} is \code{synlik} object containing the
+stochastic Ricker model, \code{ricker_smcmc} is a
+\code{smcmc} object which also contains the results of some
+MCMC iterations. The model is described \link{rickerSimul}
+and in Wood (2010).  The main components of the object are
+the simulator \link{rickerSimul} and the statistics
+\code{rickerStats}, described in the same reference.
 }
 \examples{
 data(ricker_sl)
@@ -29,14 +28,14 @@ data(ricker_smcmc)
 plot(ricker_smcmc)
 }
 \author{
-  Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
+Simon Wood and Matteo Fasiolo <matteo.fasiolo@gmail.com>.
 }
 \references{
-  Simon N Wood. Statistical inference for noisy nonlinear
-  ecological dynamic systems. Nature, 466(7310):1102--1104,
-  2010.
+Simon N Wood. Statistical inference for noisy nonlinear
+ecological dynamic systems. Nature, 466(7310):1102--1104,
+2010.
 }
 \seealso{
-  \link{rickerSimul}
+\link{rickerSimul}
 }
 

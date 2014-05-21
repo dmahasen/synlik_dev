@@ -2,11 +2,9 @@
 \alias{synMaxlik}
 \title{Synthetic likelihood maximization routine.}
 \usage{
-  synMaxlik(object, nIter, nsim, initCov,
-    initPar = object@param, addRegr = TRUE,
-    constr = list(), control = list(), multicore = FALSE,
-    ncores = detectCores() - 1, cluster = NULL,
-    verbose = FALSE, ...)
+synMaxlik(object, nIter, nsim, initCov, initPar = object@param,
+  addRegr = TRUE, constr = list(), control = list(), multicore = FALSE,
+  ncores = detectCores() - 1, cluster = NULL, verbose = FALSE, ...)
 }
 \arguments{
   \item{object}{("synlik") object.}
@@ -60,12 +58,12 @@
   everything they need.}
 }
 \value{
-  object of class "synOptim": see info about that class.
+object of class "synOptim": see info about that class.
 }
 \description{
-  Synthetic likelihood maximization routine.
+Synthetic likelihood maximization routine.
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 

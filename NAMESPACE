@@ -4,15 +4,17 @@ exportPattern("^[[:alpha:]]+")
 # Imported stuff
 importFrom(compiler, "cmpfun")
 
+importFrom(mvnfast, "rmvn", "dmvn", "maha")
+
 importFrom(methods)
 
 importFrom(abind, "abind")
 
-importFrom(plyr, "alply", "laply", "aaply")
+importFrom(plyr, "alply", "laply", "aaply", "llply", "rlply")
 
 importFrom(doSNOW, "registerDoSNOW")
 
-importFrom(MSS, "rlm")
+importFrom(MASS, "rlm")
 
 importFrom(Rcpp)
 

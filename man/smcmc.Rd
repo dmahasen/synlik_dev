@@ -2,11 +2,10 @@
 \alias{smcmc}
 \title{MCMC parameter estimation for objects of class \code{synlik}.}
 \usage{
-  smcmc(object, initPar, niter, nsim, propCov, burn = 0,
-    nchains = 1, priorFun = function(param, ...) 0,
-    targetRate = NULL, recompute = FALSE,
-    multicore = !is.null(cluster), cluster = NULL,
-    ncores = detectCores() - 1, control = list(), ...)
+smcmc(object, initPar, niter, nsim, propCov, burn = 0, nchains = 1,
+  priorFun = function(param, ...) 0, targetRate = NULL, recompute = FALSE,
+  multicore = !is.null(cluster), cluster = NULL, ncores = detectCores() -
+  1, control = list(), ...)
 }
 \arguments{
   \item{object}{An object of class \code{synlik}.}
@@ -44,29 +43,29 @@
   \code{slik} function, see \code{\link{slik}}.}
 }
 \value{
-  If \code{nchains == 1} an object of class \code{smcmc}
-  will be returned. Otherwise a list of \code{nchains}
-  \code{smcmc} objects will be returned.
+If \code{nchains == 1} an object of class \code{smcmc} will
+be returned. Otherwise a list of \code{nchains}
+\code{smcmc} objects will be returned.
 }
 \description{
-  MCMC parameter estimation for objects of class
-  \code{synlik}.
+MCMC parameter estimation for objects of class
+\code{synlik}.
 }
 \details{
-  When \code{multicore == TRUE} there are two possible
-  behaviours: if \code{nchains == 1} the the parallelism
-  takes place at each step of the MCMC chain
-  (\code{object@simulator} and \code{object@summaries} are
-  called in parallel). If \code{nchains > 1} each chain
-  will be assigned to a different node of the cluster, and
-  there is no parallelism within the chains.
+When \code{multicore == TRUE} there are two possible
+behaviours: if \code{nchains == 1} the the parallelism
+takes place at each step of the MCMC chain
+(\code{object@simulator} and \code{object@summaries} are
+called in parallel). If \code{nchains > 1} each chain will
+be assigned to a different node of the cluster, and there
+is no parallelism within the chains.
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>, code for
-  adaptive step from the adaptMCMC package.
+Matteo Fasiolo <matteo.fasiolo@gmail.com>, code for
+adaptive step from the adaptMCMC package.
 }
 \references{
-  Vihola, M. (2011) Robust adaptive Metropolis algorithm
-  with coerced acceptance rate.  Statistics and Computing.
+Vihola, M. (2011) Robust adaptive Metropolis algorithm with
+coerced acceptance rate.  Statistics and Computing.
 }
 

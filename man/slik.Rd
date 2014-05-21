@@ -2,8 +2,8 @@
 \alias{slik}
 \title{Evaluates the synthetic log-likelihood.}
 \usage{
-  slik(object, param, nsim, multicore = FALSE,
-    ncores = detectCores() - 1, cluster = NULL, ...)
+slik(object, param, nsim, multicore = FALSE, ncores = detectCores() - 1,
+  cluster = NULL, ...)
 }
 \arguments{
   \item{object}{An object of class \code{synlik}.}
@@ -32,11 +32,11 @@
   \code{object@extraArgs} everything they need.}
 }
 \value{
-  The estimated value of the synthetic log-likelihood at
-  \code{param}.
+The estimated value of the synthetic log-likelihood at
+\code{param}.
 }
 \description{
-  Evaluates the synthetic log-likelihood.
+Evaluates the synthetic log-likelihood.
 }
 \examples{
 data(ricker_sl)
@@ -44,11 +44,11 @@ set.seed(643)
 slik(ricker_sl, param = c(3.8, -1.2, 2.3), nsim = 500)
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 \references{
-  Simon N Wood. Statistical inference for noisy nonlinear
-  ecological dynamic systems. Nature, 466(7310):1102--1104,
-  2010.
+Simon N Wood. Statistical inference for noisy nonlinear
+ecological dynamic systems. Nature, 466(7310):1102--1104,
+2010.
 }
 

@@ -2,7 +2,7 @@
 \alias{coef.sml}
 \title{Parameters estimates for "sml" objects}
 \usage{
-  \method{coef}{sml} (object, lag = 10, ...)
+\method{coef}{sml}(object, burn = 0, ...)
 }
 \arguments{
   \item{object}{("sml") object.}
@@ -12,9 +12,9 @@
   object@niter.}
 }
 \description{
-  Parameters estimates for "sml" objects
+Parameters estimates for "sml" objects
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 

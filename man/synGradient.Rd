@@ -2,10 +2,9 @@
 \alias{synGradient}
 \title{Estimate gradient and hessian of the synthetic likelihood.}
 \usage{
-  synGradient(object, param, nsim, covariance,
-    addRegr = TRUE, constr = list(), multicore = FALSE,
-    ncores = detectCores() - 1, cluster = NULL,
-    tolVar = 10 * .Machine$double.eps, ...)
+synGradient(object, param, nsim, covariance, addRegr = TRUE,
+  constr = list(), multicore = FALSE, ncores = detectCores() - 1,
+  cluster = NULL, tolVar = 10 * .Machine$double.eps, ...)
 }
 \arguments{
   \item{object}{an object of class "synlik".}
@@ -51,17 +50,16 @@
   everything they need.}
 }
 \value{
-  a list containing: ["gradient"] = (numeric) estimated
-  gradient of the synthetic log-likelihood at currPar;
-  ["hessian"] = (matrix) estimated hessian of the synthetic
-  log-likelihood at currPar; ["llk"] = (scalar) estimated
-  value of the synthetic log-likelihood at currPar.
+a list containing: ["gradient"] = (numeric) estimated
+gradient of the synthetic log-likelihood at currPar;
+["hessian"] = (matrix) estimated hessian of the synthetic
+log-likelihood at currPar; ["llk"] = (scalar) estimated
+value of the synthetic log-likelihood at currPar.
 }
 \description{
-  Estimate gradient and hessian of the synthetic
-  likelihood.
+Estimate gradient and hessian of the synthetic likelihood.
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 

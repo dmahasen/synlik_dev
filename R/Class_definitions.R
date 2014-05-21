@@ -199,6 +199,9 @@ synlik <- function(...)
 #'                                           Default 100.}
 #'                   \item{\code{verbose} = if \code{TRUE} intermediate posterior means will be printer.}
 #'                   \item{\code{verbFreq} = frequency with which the intermediate posterior means will be printer. Default 500.}
+#'                   \item{\code{initLoglik} = vector of length \code{ncores} giving the initial log-likelihood for each chain.
+#'                                             Mainly for internal use by the \code{continue} generic.}
+#'                   
 #' } }
 #'  }
 #'  

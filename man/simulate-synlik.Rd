@@ -1,7 +1,11 @@
-\name{simulate}
-\alias{simulate}
+\docType{methods}
+\name{simulate,synlik-method}
 \alias{simulate,synlik-method}
 \title{Simulate data or statistics from an object of class \code{synlik}.}
+\usage{
+\S4method{simulate}{synlik}(object, nsim, seed = NULL, param = object@param,
+  stats = FALSE, clean = TRUE, verbose = TRUE, ...)
+}
 \arguments{
   \item{object}{An object of class \code{synlik}.}
 
@@ -34,15 +38,15 @@
   \code{object@extraArgs} everything they need.}
 }
 \value{
-  If \code{stats == FALSE} the output will that of
-  \code{object@simulator}, which depends on the simulator
-  used by the user.  If \code{stats == TRUE} the output
-  will be a matrix where each row is vector of simulated
-  summary statistics.
+If \code{stats == FALSE} the output will that of
+\code{object@simulator}, which depends on the simulator
+used by the user.  If \code{stats == TRUE} the output will
+be a matrix where each row is vector of simulated summary
+statistics.
 }
 \description{
-  Simulate data or statistics from an object of class
-  \code{synlik}.
+Simulate data or statistics from an object of class
+\code{synlik}.
 }
 \examples{
 data(ricker_sl)
@@ -54,9 +58,9 @@ simulate(ricker_sl, nsim = 2)
 simulate(ricker_sl, nsim = 2, stats = TRUE)
 }
 \author{
-  Matteo Fasiolo <matteo.fasiolo@gmail.com>
+Matteo Fasiolo <matteo.fasiolo@gmail.com>
 }
 \seealso{
-  \code{\link{synlik-class}}, \code{\link{simulate}}.
+\code{\link{synlik-class}}, \code{\link{simulate}}.
 }
 

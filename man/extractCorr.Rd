@@ -2,16 +2,16 @@
 \alias{extractCorr}
 \title{Extracting correlations from a covariance matrix}
 \usage{
-  extractCorr(mat)
+extractCorr(mat)
 }
 \arguments{
   \item{mat}{A covariance matrix.}
 }
 \value{
-  The correlation matrix embedded in \code{mat}.
+The correlation matrix embedded in \code{mat}.
 }
 \description{
-  Extracting correlations from a covariance matrix
+Extracting correlations from a covariance matrix
 }
 \examples{
 # 2 dimensional case
