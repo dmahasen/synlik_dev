@@ -47,7 +47,7 @@
 #' }
 #' @export dmvnFast
 
-dmvnFast <- function(X, mu, sigma, log = FALSE, isChol = FALSE, verbose = TRUE){
+dmvnFast_not_working <- function(X, mu, sigma, log = FALSE, isChol = FALSE, verbose = TRUE){
   
   if( !is.matrix(X) ) X <- matrix(X, 1, length(X))
   

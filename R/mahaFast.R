@@ -42,7 +42,7 @@
 #' }
 #' @export 
 
-mahaFast <- function(X, mu, sigma, isChol = FALSE)
+mahaFast_not_working <- function(X, mu, sigma, isChol = FALSE)
 {
   if( !is.matrix(X) ) X <- matrix(X, 1, length(X))
     
