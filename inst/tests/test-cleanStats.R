@@ -1,4 +1,6 @@
 
+context("cleanStats")
+
 test_that("cleanStats cleans a matrix properly", {
   x <- matrix(1:10, 10, 10, byrow = FALSE)
   x[3, 1] = NA
