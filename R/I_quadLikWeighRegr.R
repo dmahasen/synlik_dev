@@ -24,7 +24,7 @@
     mu <- apply(parMat, 2, median)
     Sig <- cov(parMat)
     
-    dist <- mahaFast(X = parMat, mu = mu, sigma = Sig)
+    dist <- maha(X = parMat, mu = mu, sigma = Sig)
     
     good <- ( dist < qchisq(quant, npar) )
     parMat <- parMat[good, , drop = FALSE]

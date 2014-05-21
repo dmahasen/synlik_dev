@@ -32,7 +32,7 @@ coef.mcmc <- function(object,
   # Discarding initial part of the chains
   if( burn > 0 ){
     object$llkStore <- object$llkStore[-(1:burn), , drop = FALSE]
-    object$parStore <- object$parStore[-(1:burn), varPar,  , drop = FALSE]
+    object$parStore <- object$parStore[-(1:burn), ,  , drop = FALSE]
   }
   
   if(method == "mle")

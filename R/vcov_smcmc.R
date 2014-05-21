@@ -19,9 +19,8 @@
 
 vcov.smcmc <- function(object, method = "bayes", nreps = 1000, boot = TRUE, quant = 0.1, ...)
 { 
-  # Including only parameters that were estimated
-  varPar <- diag(object@propCov) > 0
-  
+
+  # Creating "mcmc" object  
   mcmcObj <- list("initPar" = object@initPar,
                   "propCov" = object@propCov, 
                   "llkStore" = object@llkStore,

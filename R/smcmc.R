@@ -62,11 +62,12 @@ smcmc <- function(object,
     cluster <- tmp$cluster
     ncores <- tmp$ncores
     clusterCreated <- tmp$clusterCreated
+    
   }
   
   if( !is.matrix(initPar) ) initPar <- t(initPar)
   if( is.null(colnames(initPar)) ) colnames(initPar) <- names(object@param)
-  
+    
   # multicore, ncores and cluster go in the "..."
   likFun <- function(param, multicore, ncores, cluster, ...)
   {
