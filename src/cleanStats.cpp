@@ -16,23 +16,23 @@ SEXP cleanStats(SEXP inMat)
     try{
     NumericMatrix X = as<NumericMatrix>(inMat);
     
-    int nRows = X.nrow();
-    int nCols = X.ncol();
+    uint32_t nRows = X.nrow();
+    uint32_t nCols = X.ncol();
     
     //if(nCols > nRows) Rcout << "cleanStats:  nCols > nRows mean more statistics then simulations?!" << std::endl;
     
     IntegerVector banned;
     
     // Looking row by row...      
-    for(int iRow = 0; iRow < nRows; iRow++)
-      for(int iCol = 0; iCol < nCols; iCol++)
+    for(uint32_t iRow = 0; iRow < nRows; iRow++)
+      for(uint32_t iCol = 0; iCol < nCols; iCol++)
         if(R_IsNA(X(iRow, iCol)) || R_IsNaN(X(iRow, iCol)))
         {
           banned.push_back(iRow); 
           iCol = nCols;            // We stop checking this row is we find an NA or NaN
         }
     
-    int nBanned = banned.size();
+    uint32_t nBanned = banned.size();
     if(nBanned == nRows) stop("All the vectors of summaries statistics contain NAs or NaNs");
     
     /* IF( there are some NaN or NA ) we fill up a new "clean" matrix row by row.
@@ -41,12 +41,12 @@ SEXP cleanStats(SEXP inMat)
       */
       if(nBanned > 0)
       {
-        int remRows = nRows - nBanned;
+        uint32_t remRows = nRows - nBanned;
         NumericMatrix cleanX(remRows, nCols);
         
-        int banIndex = 0;
-        int outRow = 0;
-        for(int inRow = 0; inRow < remRows; outRow++)
+        uint32_t banIndex = 0;
+        uint32_t outRow = 0;
+        for(uint32_t inRow = 0; inRow < remRows; outRow++)
         {
           if(banIndex >= nBanned || outRow != banned[banIndex])
           {

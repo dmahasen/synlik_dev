@@ -22,14 +22,14 @@ SEXP checkBoundsCpp(SEXP theMean_,
     NumericVector upper = as<NumericVector>(upper_);
     NumericVector lower = as<NumericVector>(lower_);
     
-    int nsim = output.n_rows;
+    uint32_t nsim = output.n_rows;
     int nPar = output.n_cols;
     int nChecks = indexes.size();
     indexes = indexes - 1.0;
     
     bool found = false;
-    int jj;
-    int iSimul = 0;
+    uint32_t jj;
+    uint32_t iSimul = 0;
     
     // Check one row of output at the time
     while(iSimul < nsim)
