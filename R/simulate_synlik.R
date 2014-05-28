@@ -4,6 +4,9 @@
                               param = object@param, 
                               stats = FALSE,
                               clean = TRUE,
+                              multicore = !is.null(cluster),
+                              cluster = NULL,
+                              ncores = detectCores() - 1,
                               verbose = TRUE,
                               ...)
 {
@@ -19,17 +22,52 @@
   summaries <- object@summaries
   extraArgs <- object@extraArgs
   
-  # Simulate data
-  simul <- simulator(param = param, nsim = nsim, extraArgs = extraArgs, ...)
-  
-  # Transform into summary statistics
-  if( stats == TRUE ) {
+  if( multicore ){ 
+    # Force evaluation of everything in the environment, so it will available to singleChain on cluster
+    .forceEval(ALL = TRUE)
     
-    if(!is.null(summaries) ) simul <- summaries(x = simul, extraArgs = extraArgs, ...)
-    
-    # Cleaning the stats from NANs
-    if( clean ) simul <- .clean(X = simul, verbose = verbose)$cleanX
+    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
+    cluster <- tmp$cluster
+    ncores <- tmp$ncores
+    clusterCreated <- tmp$clusterCreated
+    registerDoSNOW(cluster)
   }
+  
+  # Divide simulations between nodes
+  coresSchedule <- if(multicore) c( rep(floor(nsim / ncores), ncores - 1), floor(nsim / ncores) + nsim %% ncores) else nsim
+  
+  # Launch simulations
+  withCallingHandlers({
+    tmp <- alply(.data = coresSchedule,
+                 .margins = 1,
+                 .fun = function(input){
+                   # Simulate data
+                   simul <- simulator(param = param, nsim = input, extraArgs = extraArgs, ...)
+                   
+                   # Transform into summary statistics
+                   if( stats == TRUE ) {
+                     
+                     if(!is.null(summaries) ) simul <- summaries(x = simul, extraArgs = extraArgs, ...)
+                     
+                   }
+                   return( simul )
+                 },
+                 .parallel = multicore,
+                 ...
+    )
+  }, warning = function(w) {
+    # There is a bug in plyr concerning a useless warning about "..."
+    if (length(grep("... may be used in an incorrect context", conditionMessage(w))))
+      invokeRestart("muffleWarning")
+  })
+  
+  # Close the cluster if it was opened inside this function
+  if(multicore && clusterCreated) stopCluster(cluster)
+  
+  simul <- do.call("rbind", tmp)
+  
+  # Cleaning the stats from NANs
+  if( clean ) simul <- .clean(X = simul, verbose = verbose)$cleanX
   
   return( simul )
 }

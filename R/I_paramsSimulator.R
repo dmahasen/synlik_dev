@@ -34,7 +34,7 @@
   
   nPar <- length(theMean)
   cholFact <- chol(covar)
-  output <- .rmvn(nsim, mu = theMean, sigma = cholFact, isChol = TRUE) 
+  output <- rmvn(nsim, mu = theMean, sigma = cholFact, isChol = TRUE) 
   
   # (Optionally) check contraints and re-simulate parameter vectors that fall outside them
   if( length(constr) )
@@ -46,7 +46,7 @@
     stopifnot( length(upper) == length(lower), length(lower) <= nPar, length(indexes) == length(lower), 
                all(upper > lower) )
     
-    # Calls C++ function that loops through output, and checks the constrainst
+    # Calls C++ function that loops through output, and checks the constraints
     output <- .Call("checkBoundsCpp", 
                     theMean_ = theMean, cholFact_ = t(cholFact), indexes_ = indexes,            
                     upper_ = upper, lower_ = lower, output_ = output, 

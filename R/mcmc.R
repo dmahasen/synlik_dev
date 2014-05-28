@@ -86,7 +86,6 @@ mcmc <- function(likFun,
   # Launch MCMC chain(s)
   withCallingHandlers({
     out <- llply(.data = initSettings,
-                 .margins = 1,
                  .fun = singleChain,
                  .parallel = multicore && (nchains > 1),
                  # ... from here
