@@ -22,9 +22,12 @@ shrinkStat <- function(object, nsim, mu, sigma, type = "ridge", constr = list(),
                        verbose = TRUE, ...) 
 {
   
-  fixPar <- which( diag(sigma == 0) )
+  
   regrCoef <- unname( shrinkCoef(object = as(object, "synlik"), nsim = nsim, mu = mu, sigma = sigma, type = type, constr = constr, clean = clean, 
-                                 multicore = multicore, ncores = ncores, cluster = cluster, verbose = verbose, ...)$regrCoef[-fixPar, , drop = FALSE] )
+                                 multicore = multicore, ncores = ncores, cluster = cluster, verbose = verbose, ...)$regrCoef )
+  
+  fixPar <- which( diag(sigma == 0) )
+  if( length(fixPar) ) regrCoef <- regrCoef[-fixPar, , drop = FALSE]
   
   origStats <- force( object@summaries ) # Forcing evaluation just in case
   

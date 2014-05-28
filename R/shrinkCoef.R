@@ -89,7 +89,7 @@ shrinkCoef <- function(object, nsim, mu, sigma, type = "ridge", constr = list(),
   # For each parameter, find the optimal penalty and parameters using ridge regression or lasso
   for(iPar in 1:nPar)
   {
-    if( !(iPar %in%fixPar) )
+    if( !(iPar %in% fixPar) )
     {
       y <- param[ , iPar]
       
