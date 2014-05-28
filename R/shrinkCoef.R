@@ -20,45 +20,66 @@
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>, re-using much code from \code{MASS::lm.ridge()}.                         
 #' @export shrinkCoef       
 
-shrinkCoef <- function(object, nsim, mu, sigma, type = "ridge", constr = list(), verbose = TRUE, clean = TRUE, ...)
+shrinkCoef <- function(object, nsim, mu, sigma, type = "ridge", constr = list(), 
+                       multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, 
+                       verbose = TRUE, clean = TRUE, ...)
 {
   if( !(type %in% c("ridge", "lasso")) ) stop(" type should be either \"ridge\" or \"lasso\" ")
   
   nPar <- length(object@param)
   
-  fixPar <- which( diag(sigma) == 0 )
-  
   stopifnot( is.numeric(mu), is.numeric(sigma), length(mu) == nPar )
   
-  # Simulate the parameters from uniforms of the correct size
+  # Fixing parameters with variance == 0
+  fixPar <- which( diag(sigma) == 0 )
+  if( length(fixPar) ) message( paste("Parameters", names(object@param)[fixPar], "are considered fixed") )
+  
+  # Simulate the parameters from truncated multivariate normal
   param <- .paramsSimulator(theMean = mu, covar = sigma, nsim = nsim, constr = constr)
   
-  # Simulate data and clean it
-  simul <- simulate.synlik(object = object, nsim = nsim, param = param, ...)
-  
-  if( clean ) {
-    tmp <- .clean(X = simul, verbose = TRUE)
-    if(tmp$nBanned > 0){
-      simul <- tmp$cleanX
-      param <- param[-tmp$banned, ]
-    }
+  if( multicore ){ 
+    # Force evaluation of everything in the environment
+    .forceEval(ALL = TRUE)
+    
+    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
+    cluster <- tmp$cluster
+    ncores <- tmp$ncores
+    clusterCreated <- tmp$clusterCreated
+    registerDoSNOW(cluster)
   }
   
-  # Transform into statistics and clean them
-  summaries <- object@summaries
-  if( !is.null(summaries) ) 
+  # Simulate a vector of statistics for each parameter value
+  withCallingHandlers({
+    simul <- alply(.data = param,
+                   .margins = 1,
+                   .fun = function(input){
+                     
+                     return(
+                       tryCatch( .simulate.synlik(object = object, nsim = 1, param = input, stats = TRUE, clean = FALSE, multicore = FALSE, ...),
+                                 error = function(e) return(NA))
+                     )
+                     
+                   },
+                   .parallel = multicore,
+                   ...
+    )
+  }, warning = function(w) {
+    # There is a bug in plyr concerning a useless warning about "..."
+    if (length(grep("... may be used in an incorrect context", conditionMessage(w))))
+      invokeRestart("muffleWarning")
+  })
+  
+  # Close the cluster if it was opened inside this function
+  if(multicore && clusterCreated) stopCluster(cluster)
+  
+  simul <- do.call("rbind", simul)
+  
+  # Removing missing values
+  if(clean)
   {
-    extraArgs <- object@extraArgs
-    simul <- summaries(x = simul, extraArgs = extraArgs, ...)
-    
-    
-    if( clean ) {
-      tmp <- .clean(X = simul, verbose = TRUE)
-      if(tmp$nBanned > 0){
-        simul <- tmp$cleanX
-        param <- param[-tmp$banned, ]
-      }
-    }
+    goodPar <- !is.na(simul[ , 1])
+    simul <- simul[goodPar, , drop = FALSE]
+    param <- param[goodPar, , drop = FALSE]  
   }
   
   regrCoef <- matrix(NA, nPar, ncol(simul) + 1) # + 1 is intercept

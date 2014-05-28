@@ -17,10 +17,14 @@
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>.                         
 #' @export shrinkStat         
 
-shrinkStat <- function(object, nsim, mu, sigma, type = "ridge", constr = list(), clean = TRUE, verbose = TRUE, ...) 
+shrinkStat <- function(object, nsim, mu, sigma, type = "ridge", constr = list(), clean = TRUE, 
+                       multicore = FALSE, ncores = detectCores() - 1, cluster = NULL,
+                       verbose = TRUE, ...) 
 {
   
-  regrCoef <- unname( shrinkCoef(object = object, nsim = nsim, mu = mu, sigma = sigma, type = type, constr = constr, clean = clean, verbose = verbose, ...)$regrCoef )
+  fixPar <- which( diag(sigma == 0) )
+  regrCoef <- unname( shrinkCoef(object = as(object, "synlik"), nsim = nsim, mu = mu, sigma = sigma, type = type, constr = constr, clean = clean, 
+                                 multicore = multicore, ncores = ncores, cluster = cluster, verbose = verbose, ...)$regrCoef[-fixPar, , drop = FALSE] )
   
   origStats <- force( object@summaries ) # Forcing evaluation just in case
   
