@@ -28,11 +28,12 @@ coef.mcmc <- function(object,
                       ...)
 {
   if( !(method %in% c("bayes", "mle")) ) stop("method should be either \"mle\" or \"bayes\"")
-  
+
   # Discarding initial part of the chains
   if( burn > 0 ){
+    object$chains   <- object$chains[-(1:burn), , , drop = FALSE]
+    object$parStore <- object$parStore[-(1:burn), , , drop = FALSE]
     object$llkStore <- object$llkStore[-(1:burn), , drop = FALSE]
-    object$parStore <- object$parStore[-(1:burn), ,  , drop = FALSE]
   }
   
   if(method == "mle")
