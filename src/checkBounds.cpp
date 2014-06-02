@@ -64,6 +64,6 @@ SEXP checkBoundsCpp(SEXP theMean_,
   } catch(...){
     ::Rf_error( "c++ exception (unknown reason)" );
   }
-  
+  return wrap(NA_REAL);
 }
 

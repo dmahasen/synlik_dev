@@ -63,5 +63,5 @@ SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_, SEXP kum2
     } catch(...){
       ::Rf_error( "c++ exception (unknown reason)" );
     }
-    
+    return Rcpp::wrap(NA_REAL);
 }

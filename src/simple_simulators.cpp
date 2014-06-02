@@ -44,7 +44,7 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
   } catch(...){
     ::Rf_error( "c++ exception (unknown reason)" );
   }
-  
+  return wrap(NA_REAL);
 }
 
 /*
