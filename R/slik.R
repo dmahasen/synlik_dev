@@ -26,11 +26,10 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   .slik(object = object, 
         param = param, 
         nsim  = nsim, 
-        decay = 0.5, 
         multicore = multicore, 
         ncores = ncores, 
         cluster = cluster, 
-        ...)$logLik
+        ...)$llk
   
 }
 
@@ -38,7 +37,7 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
 # INTERNAL
 ####
 
-.slik <- function(object, param, nsim, saddle = FALSE, decay = 0.5, multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, ...) 
+.slik <- function(object, param, nsim, saddle = FALSE, decay = 0.5, aux = 0, multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, ...) 
 {
   
   if(!is(object, "synlik")) stop("object has to be of class \"synlik\" ")
@@ -47,6 +46,8 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   if( !class(object)[[1]] != "synlik" ) object <- as(object, "synlik")
   
   if( !is.vector(param) ) stop("param should be a numeric vector.")
+  
+  if( aux && !saddle ) stop("\"aux\" is true but you are not using a saddlepoint density")
     
   simulData <- .simulate.synlik(object, 
                                 param = param, 
@@ -66,7 +67,32 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   obsStats <- if( !is.null(summaries) ) summaries(x = object@data, extraArgs = object@extraArgs, ...) else object@data
   
   # Calculating log-likelihood
-  return( .empDens(y = obsStats, X = simulData, saddle = saddle, decay = decay, tol = 1e-6, log = TRUE) )
+  # If saddle == TRUE returns saddlepoint density, otherwise a normal density
+  if( saddle )
+  {
+    
+    out <- dsaddle(y = obsStats, X = simulData, decay = decay, log = TRUE, ...)
+    
+    # Correct the log-likelihood for the missing normalizing constant
+    if( aux ){
+      
+      tmp <- robCov( t(simulData) )
+      
+      auxStat <- rmvn(aux, tmp$mY, tmp$COV)
+      
+      normConst <- .meanExpTrick( dsaddle(y = auxStat, X = simulData, decay = decay, log = TRUE, ...)$llk - dmvn(auxStat, tmp$mY, tmp$COV, log = TRUE) )
+      
+      out$llk <- out$llk - log( normConst )
+      
+    }
+
+  } else  {
+    
+    out <- list("llk" = demvn(y = obsStats, X = simulData, log = TRUE, verbose = FALSE), "mix" = 0)
+    
+  }
+    
+  return( out )
   
 }
 

@@ -25,6 +25,7 @@ mcmc <- function(likFun,
   if( multicore ){ 
     # Force evaluation of everything in the environment, so it will available to singleChain on cluster
     .forceEval(ALL = TRUE)
+    control$verbose <- FALSE
     
     tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
     cluster <- tmp$cluster
@@ -117,6 +118,8 @@ mcmc <- function(likFun,
   # Putting llkChain is a matrix niter X nchains
   llkChain <- do.call("cbind", lapply(out, "[[", "llkChain")) 
   llkStore <- do.call("cbind", lapply(out, "[[", "llkStore"))
+  
+  dimnames(chains)[[2]] <- dimnames(parStore)[[2]] <- colnames(initPar)
   
   return( list("likFun"  = likFun,
                "initPar" = initPar,
@@ -282,8 +285,8 @@ mcmc <- function(likFun,
     # (Optionally) print out intermediate results
     if( ctrl$verbose == TRUE && (ii > burn) && !(ii %% ctrl$verbFreq) )
     {
-      tmp <- colMeans(mcmcSample[1:ii, ], na.rm = TRUE)
-      names(tmp) <- names(object@param)
+      tmp <- colMeans(mcmcSample[1:ii, , drop = F], na.rm = TRUE)
+      names(tmp) <- names(initPar)
       cat(paste("Empirical posterior means at iteration", ii - burn, "\n"))
       print(tmp)
     }

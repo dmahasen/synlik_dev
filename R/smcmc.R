@@ -39,6 +39,7 @@ smcmc <- function(object,
                   propCov, 
                   burn = 0,
                   nchains = 1,
+                  saddle = FALSE,
                   priorFun = function(param, ...) 0,
                   targetRate = NULL,
                   recompute = FALSE,
@@ -57,6 +58,7 @@ smcmc <- function(object,
   if( multicore ){ 
     # Force evaluation of everything in the environment, so it will available to funToApply on cluster
     .forceEval(ALL = TRUE)
+    control$verbose <- FALSE
     
     tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
     cluster <- tmp$cluster
@@ -79,6 +81,7 @@ smcmc <- function(object,
          multicore = multicore,
          ncores = ncores,
          cluster = cluster,
+         saddle = saddle,
          ...) 
   }
   

@@ -14,6 +14,7 @@
 #'                          numerical calculations.
 #' @return A list where:
 #'         \itemize{
+#'         \item{\code{COV}}{The estimated covariance matrix.}
 #'         \item{\code{E}}{a square root of the inverse covariance matrix. i.e. the inverse cov 
 #'                         matrix is \code{t(E)\%*\%E};}
 #'         \item{\code{half.ldet.V}}{Half the log of the determinant of the covariance matrix;}
