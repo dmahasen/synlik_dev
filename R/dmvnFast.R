@@ -47,7 +47,7 @@
 #' }
 #' @export dmvnFast
 
-dmvnFast_not_working <- function(X, mu, sigma, log = FALSE, isChol = FALSE, verbose = TRUE){
+.dmvn_wrapper <- function(X, mu, sigma, log = FALSE, isChol = FALSE, verbose = TRUE){
   
   if( !is.matrix(X) ) X <- matrix(X, 1, length(X))
   
@@ -64,12 +64,6 @@ dmvnFast_not_working <- function(X, mu, sigma, log = FALSE, isChol = FALSE, verb
     sigma <- sigma[-fix, -fix]
   }
   
-  drop(.Call( "dmvnCpp", 
-              X_ = X, 
-              mu_ = mu, 
-              sigma_ = sigma, 
-              log_ = log, 
-              isChol_ = isChol, 
-              PACKAGE = "synlik" ))
+  drop( dmvn(X = X, mu = mu, sigma = sigma, log = log, isChol = isChol) )
 }
 

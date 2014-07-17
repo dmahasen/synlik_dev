@@ -34,6 +34,7 @@ ml <- function(likFun, initPar, initCov, np, niter, priorFun = NULL, alpha = 0.9
   { 
     # Simulating parameter vectors
     simpar <- .paramsSimulator(theMean = parMean, covar = parCov, nsim = np, constr = constr)
+    colnames(simpar) <- names(initPar)
     
     # Evaluating the likelihoods
     llk <- .funEval(parMat = simpar, fun = likFun, multicore = multicore, cluster = cluster, ...)
@@ -46,7 +47,7 @@ ml <- function(likFun, initPar, initCov, np, niter, priorFun = NULL, alpha = 0.9
                                           "llk" = llk,
                                           "logprior" = logprior,
                                           "logW"   = rep(0, np),
-                                          "dens" = dmvnFast(X = simpar, mu = parMean, sigma = parCov, log = F, verbose = FALSE)
+                                          "dens" = .dmvn_wrapper(X = simpar, mu = parMean, sigma = parCov, log = F, verbose = FALSE)
     )
     
     w <- llk + logprior
@@ -61,6 +62,8 @@ ml <- function(likFun, initPar, initCov, np, niter, priorFun = NULL, alpha = 0.9
     
     # Discarding parameter with bad weights
     good <- !is.na(w)
+    if( all(good == FALSE) ) stop("All estimated likelihoods are NaNs") 
+    
     w <- w[ good ] 
     simpar <- simpar[good, ]
     

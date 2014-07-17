@@ -1,6 +1,6 @@
 
 sml <- function(object, initPar, initCov, np, nsim, niter, alpha = 0.95,
-                priorFun = NULL, temper = NULL, recycle = FALSE,
+                priorFun = NULL, temper = rep(1, niter), recycle = FALSE,
                 multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, 
                 constr = list(), verbose = FALSE, ...)
 {
