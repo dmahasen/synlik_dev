@@ -66,6 +66,9 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   summaries <- object@summaries
   obsStats <- if( !is.null(summaries) ) summaries(x = object@data, extraArgs = object@extraArgs, ...) else object@data
   
+  # Dealing with possibly multiple datasets: each row could be a set of summary statistics
+  if( !is.matrix(obsStats) ) obsStats <- matrix(obsStats, 1, length(obsStats))
+  
   # Calculating log-likelihood
   # If saddle == TRUE returns saddlepoint density, otherwise a normal density
   if( saddle )
@@ -91,6 +94,8 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
     out <- list("llk" = demvn(y = obsStats, X = simulData, log = TRUE, verbose = FALSE), "mix" = 0)
     
   }
+  
+  out$llk <- sum(out$llk)
     
   return( out )
   
