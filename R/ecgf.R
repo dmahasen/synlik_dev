@@ -104,11 +104,11 @@ ecgf <- function(lambda, X, grad = 0, mix = 0.9) {
            "gaus" = { dGam <- drop( (mix * addList$decay / sqrt(d)) * solve(kum2, kum1 - addList$y) )  },
            
            "mse" = { normRes <- solve(kum2, addList$y - kum1)
-                     scaledRSS <- crossprod(addList$y - kum1, normRes) / sqrt(d)
+                     scaledRSS <- crossprod(addList$y - kum1, normRes)
                      sadVar <- exp(scaledRSS)
                      normVar <- scaledRSS + 0.5 * scaledRSS^2 + 1
-                     d_sadVar <- 2 * sadVar * normRes / sqrt(d)
-                     d_normVar <- 2 * normRes * ( 1 + scaledRSS ) / sqrt(d) 
+                     d_sadVar <- 2 * sadVar * normRes
+                     d_normVar <- 2 * normRes * ( 1 + scaledRSS ) 
                      dGam <- drop( d_normVar * sadVar - normVar * d_sadVar ) / (sadVar^2)
                      
                      if(normVar / sadVar < 1){

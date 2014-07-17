@@ -28,6 +28,9 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
   
   d <- ncol(X)
   
+  # Offsetting dimensionality, so decay stays pretty much at the same level for any d.
+  decay <- decay / ( d ^ 2 )
+  
   if( !is.matrix(y) && d > 1 ) y <- matrix(y, 1, ncol(X))
   
   # Pre-calculating covariance
@@ -93,17 +96,17 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
   # the gain is one step less of Newton on average.
   lambda <- drop( crossprod(preCov$E, preCov$E %*% (y - preCov$mY)) )
   
-  scaledRSS <-  drop( sum( (preCov$E %*% (y - preCov$mY))^2 ) / sqrt(m) )
+  rss <-  drop( sum( (preCov$E %*% (y - preCov$mY))^2 ) )
   
   # Choosing method to determine the mixture between gaussian and normal ecgf
   switch(mixMethod,
          "gaus" = {
-           mix <- exp( - decay * scaledRSS / 2 )
+           mix <- exp( - decay * rss / (sqrt(m) * 2) )
          },
          "mse" = {
-           sadMse <- exp(scaledRSS) 
-           gausMse <- scaledRSS + scaledRSS^2 / 2 + 1
-           mix <- min(gausMse / sadMse, 1) ^ decay
+           sadMse <- exp(rss) 
+           gausMse <- rss + 0.5*rss^2 + 1
+           mix <- (gausMse / sadMse) ^ decay
          },
          stop("\"mixMethod\" must be either \"gaus\" or \"mse\"") 
   )
