@@ -89,6 +89,7 @@ mcmc <- function(likFun,
     out <- llply(.data = initSettings,
                  .fun = singleChain,
                  .parallel = multicore && (nchains > 1),
+                 .inform = TRUE,
                  # ... from here
                  multicore = funMulti,
                  ncores = funNcores,
@@ -119,7 +120,7 @@ mcmc <- function(likFun,
   llkChain <- do.call("cbind", lapply(out, "[[", "llkChain")) 
   llkStore <- do.call("cbind", lapply(out, "[[", "llkStore"))
   
-  dimnames(chains)[[2]] <- dimnames(parStore)[[2]] <- colnames(initPar)
+  if( !is.null(colnames(initPar)) ) dimnames(chains)[[2]] <- dimnames(parStore)[[2]] <- colnames(initPar)
   
   return( list("likFun"  = likFun,
                "initPar" = initPar,

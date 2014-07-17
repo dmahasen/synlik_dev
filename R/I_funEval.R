@@ -7,6 +7,11 @@
   nsim <- nrow(parMat)
   
   tmpPar <- split( t(parMat), rep(1:nsim, each = npar) )
+  tmpPar <- lapply(tmpPar, 
+                   function(input){ 
+                     names(input) <- colnames(parMat)
+                     return(input)}
+                   )
   
   # Set up the cluster
   if(multicore)
@@ -34,8 +39,8 @@
   # If there is an error in likelihood evaluations, put those log-likelihoods to NA
   out <- sapply(out, 
                 function(input){
-                  if( !("numeric" %in%class(input)) ){
-                    warning(input)
+                  if( !("numeric" %in% class(input)) ){
+                    warning( as.character(input) )
                     return(NA)
                   } else{
                     if( !is.finite(input) ){ 

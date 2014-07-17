@@ -22,14 +22,20 @@ continue.mcmc <- function(object,
   # The initial log-likelihood has to be equal to the last one in the previous part of the chain
   ctrl$initLoglik <- drop( tail(object$llkChain, 1) )
   
+  likFun <- object$likFun
+  initPar <- aaply(object$chains, 3, tail, n = 1)
+  nchains <- object$nchains
+  
+  .forceEval(ALL = TRUE)
+  
   # For initPar and burn unless they have been specified by the user, we put
   # initPar to the final mcmc points in "object" and we don't do any more burn in.
-  tmpObj <- mcmc(likFun = object$likFun, 
-                 initPar = aaply(object$chains, 3, tail, n = 1),
+  tmpObj <- mcmc(likFun = likFun, 
+                 initPar = initPar,
                  niter = niter,
                  propCov = propCov, 
                  burn = 0,
-                 nchains = object$nchains,
+                 nchains = nchains,
                  priorFun = priorFun,
                  targetRate = targetRate,
                  recompute = recompute,

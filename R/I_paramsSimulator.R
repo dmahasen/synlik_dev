@@ -74,3 +74,6 @@
 # 
 # plot(out1)
 # points(output, col = 2)
+# 
+# all(output[ , 1] > 0 & output[ , 1] < 1)
+# all(output[ , 2] > 1 & output[ , 2] < 2)
