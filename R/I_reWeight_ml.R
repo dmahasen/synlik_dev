@@ -19,8 +19,8 @@
   for(iter in mixNam)
   {
     # Calculate new log-weights
-    logW <- pmin( dmvnFast(X = storage[[iter]]$X, mu = currMean, sigma = sigma, 
-                           log = F, isChol = isChol, verbose = FALSE) - storage[[iter]]$dens, log(maxW) )
+    logW <- pmin( .dmvn_wrapper(X = storage[[iter]]$X, mu = currMean, sigma = sigma, 
+                                log = F, isChol = isChol, verbose = FALSE) - storage[[iter]]$dens, log(maxW) )
     logW[ logW < log(minW) ] <- NA
     
     storage[[iter]]$logW <- logW + storage[[iter]]$llk + storage[[iter]]$logprior

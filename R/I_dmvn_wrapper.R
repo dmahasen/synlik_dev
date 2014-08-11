@@ -66,4 +66,3 @@
   
   drop( dmvn(X = X, mu = mu, sigma = sigma, log = log, isChol = isChol) )
 }
-
