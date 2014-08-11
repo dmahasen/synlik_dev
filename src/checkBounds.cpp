@@ -18,6 +18,8 @@ SEXP checkBoundsCpp(SEXP theMean_,
     arma::mat cholFact = as<arma::mat>(cholFact_);
     arma::mat output = as<arma::mat>(output_);
     
+    RNGScope scope; // Declare RNGScope after the output in order to avoid a known Rcpp bug.
+    
     NumericVector indexes = clone(as<NumericVector>(indexes_));
     NumericVector upper = as<NumericVector>(upper_);
     NumericVector lower = as<NumericVector>(lower_);

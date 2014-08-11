@@ -55,8 +55,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
 {
     using namespace Rcpp;
     
-    RNGScope scope;
-    
     int nparam = param.ncol(); 
     int totDays = nBurn + days;
     bool multiparam = false;
@@ -65,6 +63,9 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     if(param.nrow() > 1) { multiparam = true; }
     if(multiparam == true && param.nrow() != nSimul) 
       stop("Number of parameters vectors is different from the number of simulations");
+      
+    NumericMatrix output( nSimul, days );
+    RNGScope scope; // Declare RNGScope after the output in order to avoid a known Rcpp bug.
     
     double r = exp(param(0, 0));
     double sigma = exp(param(0, 1));
@@ -73,7 +74,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     NumericVector procNoise( rnorm( totDays * nSimul ) );
     NumericVector initState(nSimul);
     if(randInit){ initState = runif(nSimul); } else { initState = initState + initVal; }
-    NumericMatrix output( nSimul, days );
     
     NumericVector::iterator noiseIter = procNoise.begin();
     NumericVector::iterator initIter = initState.begin();
@@ -119,8 +119,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
 {
     using namespace Rcpp;
     
-    RNGScope scope;
-    
     int nparam = param.ncol(); 
     int totDays = nBurn + days;
     bool multiparam = false;
@@ -129,6 +127,9 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     if(param.nrow() > 1) { multiparam = true; }
     if(multiparam == true && param.nrow() != nSimul) 
       stop("Number of parameters vectors is different from the number of simulations");
+      
+    NumericMatrix output( nSimul, days );
+    RNGScope scope; // Declare RNGScope after the output in order to avoid a known Rcpp bug.
     
     double r = exp(param(0, 0));
     double theta = exp(param(0, 1));
@@ -139,8 +140,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     
     NumericVector initState(nSimul);
     if(randInit){ initState = runif(nSimul); } else { initState = initState + initVal; }  
-    
-    NumericMatrix output( nSimul, days );
     
     NumericVector::iterator noiseIter = procNoise.begin();
     NumericVector::iterator initIter = initState.begin();
@@ -190,9 +189,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
 {
     using namespace Rcpp;
     
-    
-    RNGScope scope;
-    
     int nparam = param.ncol(); 
     int totDays = nBurn + days;
     bool multiparam = false;
@@ -201,6 +197,9 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     if(param.nrow() > 1) { multiparam = true; }
     if(multiparam == true && param.nrow() != nSimul) 
       stop("Number of parameters vectors is different from the number of simulations");
+      
+    NumericMatrix output( nSimul, days );
+    RNGScope scope; // Declare RNGScope after the output in order to avoid a known Rcpp bug.
     
     double r = exp(param(0, 0));
     double a = exp(param(0, 1));
@@ -210,7 +209,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     NumericVector procNoise( rnorm( totDays * nSimul ) );
     NumericVector initState(nSimul);
     if(randInit){ initState = runif(nSimul); } else { initState = initState + initVal; } 
-    NumericMatrix output( nSimul, days );
     
     NumericVector::iterator noiseIter = procNoise.begin();
     NumericVector::iterator initIter = initState.begin();
@@ -258,8 +256,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
 {
     using namespace Rcpp;
     
-    RNGScope scope;
-    
     int nparam = param.ncol(); 
     int totDays = nBurn + days;
     bool multiparam = false;
@@ -268,6 +264,9 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     if(param.nrow() > 1) { multiparam = true; }
     if(multiparam == true && param.nrow() != nSimul) 
       stop("Number of parameters vectors is different from the number of simulations");
+      
+    NumericMatrix output( nSimul, days );
+    RNGScope scope; // Declare RNGScope after the output in order to avoid a known Rcpp bug.
     
     double r = exp(param(0, 0));
     double b = exp(param(0, 1));
@@ -277,7 +276,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     NumericVector procNoise( rnorm( totDays * nSimul ) );
     NumericVector initState(nSimul);
     if(randInit){ initState = runif(nSimul); } else { initState = initState + initVal; } 
-    NumericMatrix output( nSimul, days );
     
     NumericVector::iterator noiseIter = procNoise.begin();
     NumericVector::iterator initIter = initState.begin();
@@ -325,9 +323,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
 {
     using namespace Rcpp;
     
-    
-    RNGScope scope;
-    
     int nparam = param.ncol(); 
     int totDays = nBurn + days;
     bool multiparam = false;
@@ -336,6 +331,9 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     if(param.nrow() > 1) { multiparam = true; }
     if(multiparam == true && param.nrow() != nSimul) 
       stop("Number of parameters vectors is different from the number of simulations");
+      
+    NumericMatrix output( nSimul, days );
+    RNGScope scope; // Declare RNGScope after the output in order to avoid a known Rcpp bug.
     
     double r = exp(param(0, 0));
     double b = exp(param(0, 1));
@@ -345,7 +343,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     NumericVector procNoise( rnorm( totDays * nSimul ) );
     NumericVector initState(nSimul);
     if(randInit){ initState = runif(nSimul); } else { initState = initState + initVal; } 
-    NumericMatrix output( nSimul, days );
     
     NumericVector::iterator noiseIter = procNoise.begin();
     NumericVector::iterator initIter = initState.begin();
@@ -393,9 +390,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
 {
     using namespace Rcpp;
     
-    
-    RNGScope scope;
-    
     int nparam = param.ncol(); 
     int totDays = nBurn + days;
     bool multiparam = false;
@@ -404,6 +398,9 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     if(param.nrow() > 1) { multiparam = true; }
     if(multiparam == true && param.nrow() != nSimul) 
       stop("Number of parameters vectors is different from the number of simulations");
+      
+    NumericMatrix output( nSimul, days );
+    RNGScope scope; // Declare RNGScope after the output in order to avoid a known Rcpp bug.
     
     double r = exp(param(0, 0));
     double b = exp(param(0, 1));
@@ -414,7 +411,6 @@ SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP param, SEXP nBurn
     NumericVector procNoise( rnorm( totDays * nSimul ) );
     NumericVector initState(nSimul);
     if(randInit){ initState = runif(nSimul); } else { initState = initState + initVal; } 
-    NumericMatrix output( nSimul, days );
     
     NumericVector::iterator noiseIter = procNoise.begin();
     NumericVector::iterator initIter = initState.begin();
