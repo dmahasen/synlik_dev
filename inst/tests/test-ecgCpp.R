@@ -30,6 +30,10 @@ tmp_ecgf <- function(lambda, X, mix, grad, kum1, kum2)
     ret$d2K <-  as.matrix( mix * tmp.d2K  + (1-mix) * kum2, drop = FALSE) 
   }
   
+  ret$tmp_K <- tmp.K
+  ret$tmp_dK <- tmp.K
+  ret$tmp_d2K <- tmp.d2K
+  
   ret
   
 }

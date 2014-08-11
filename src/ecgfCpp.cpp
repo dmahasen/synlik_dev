@@ -20,6 +20,11 @@ SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_, SEXP kum2
       
       uint32_t n = X.n_rows;
       uint32_t d = X.n_cols;
+       
+      if( d != kum1.n_elem)       Rcpp::stop("X.n_cols != kum1.n_elem");
+      if( d != lambda.n_elem )    Rcpp::stop("X.n_cols != lambda.n_elem");
+      if( d != kum2.n_cols )      Rcpp::stop("X.n_cols != kum2.n_cols");
+      if( d != kum2.n_rows )      Rcpp::stop("X.n_cols != kum2.n_rows");
       
       vec lx = X * lambda;
       
@@ -42,7 +47,7 @@ SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_, SEXP kum2
       vec dK = mix * tmp_dK + ( 1-mix ) * ( kum1 + kum2 * lambda );
         
       // We want K and dK
-      if(grad == 1) return( Rcpp::List::create( Rcpp::Named("K") = K, Rcpp::Named("dK") = Rcpp::wrap( dK.memptr() , dK.memptr() + dK.n_elem ),
+      if(grad == 1) return( Rcpp::List::create( Rcpp::Named("K") = K, Rcpp::Named("dK") = Rcpp::wrap( dK.memptr(), dK.memptr() + dK.n_elem ),
                                                 Rcpp::Named("tmp_K") = tmp_K, Rcpp::Named("tmp_dK") = tmp_dK) );
         
       mat tmp_d2K = X.t() * elx_by_X / sum_elx - tmp_dK * tmp_dK.t();
@@ -51,8 +56,8 @@ SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_, SEXP kum2
       // We wanto also k, dK and d2K      
       if(grad == 2){
         
-        return( Rcpp::List::create( Rcpp::Named("K") = K, Rcpp::Named("dK") = Rcpp::wrap( dK.memptr() , dK.memptr() + dK.n_elem ), Rcpp::Named("d2K") = d2K,
-                                    Rcpp::Named("tmp_K") = tmp_K, Rcpp::Named("tmp_dK") = Rcpp::wrap( tmp_dK.memptr() , tmp_dK.memptr() + tmp_dK.n_elem ), Rcpp::Named("tmp_d2K") = tmp_d2K) );
+        return( Rcpp::List::create( Rcpp::Named("K") = K, Rcpp::Named("dK") = Rcpp::wrap( dK.memptr(), dK.memptr() + dK.n_elem ), Rcpp::Named("d2K") = d2K,
+                                    Rcpp::Named("tmp_K") = tmp_K, Rcpp::Named("tmp_dK") = Rcpp::wrap( tmp_dK.memptr(), tmp_dK.memptr() + tmp_dK.n_elem ), Rcpp::Named("tmp_d2K") = tmp_d2K) );
         
       } {
         Rcpp::stop("\"grad\" should be an interger equal to 0, 1 or 2");

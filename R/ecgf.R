@@ -82,6 +82,8 @@ ecgf <- function(lambda, X, grad = 0, mix = 0.9) {
   n <- nrow(X)
   d <- ncol(X)
   
+  stopifnot(d == length(lambda))
+    
   ret <- .Call("ecgfCpp",
                lambda_ = lambda, 
                X_ = X, 

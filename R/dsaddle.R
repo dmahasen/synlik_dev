@@ -40,9 +40,9 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
   # If there are some statistics with zero variance we remove them
   if( length(preCov$lowVar) )
   {
-    y <- y[-preCov$lowVar]
-    m <- m - length(preCov$lowVar)
-    X <- X[ , -preCov$lowVar, drop = FALSE]
+    stop("The columns of X indexed", preCov$lowVar, "have zero variance.")
+    #y <- y[-preCov$lowVar]
+    #X <- X[ , -preCov$lowVar, drop = FALSE]
   }
   
   # Weighting the statistics in order to downweight outliers

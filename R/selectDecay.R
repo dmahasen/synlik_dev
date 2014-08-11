@@ -116,11 +116,17 @@ selectDecay <- function(decay,
   if(ctrl$draw){
     par(mfrow = c(2, 1))
     
-    .forestPlot( out$summary[2, ], out$summary[3, ], xlabels = decay, xlab = "Decay", ylab = "- Log-likelihood (mean+-sd)" )
+    n <- length(decay)
+    matplot(y = out$negLogLik, type = 'l', xaxt = "n", xlab = "Decay", ylab = "- Log-likelihood" )
+    lines(out$summary[2, ], lwd = 2, col = 1)
+    abline(v = (1:n)[ which.min(out$summary[2, ]) ], lty = 2, lwd = 2)
+    points(out$summary[2, ], lwd = 3, col = 1)
+    axis(1, at=1:n, labels = decay)
     
-    .forestPlot( rowMeans(out$normConst), apply(out$normConst, 1, sd), xlabels = decay, 
-                 ylab = "Normalizing constants (mean+-sd)", xlab = "Decay" )
-    
+    matplot(y = out$normConst, type = 'l', xaxt = "n", ylab = "Normalizing constants", xlab = "Decay" )
+    lines(rowMeans(out$normConst), lwd = 2, col = 1)
+    points(rowMeans(out$normConst), lwd = 3, col = 1)
+    axis(1, at=1:n, labels = decay)
   }
     
   return( invisible( out ) )
