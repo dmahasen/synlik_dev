@@ -21,17 +21,29 @@
 #' @export
 #'
 
-dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse", log = FALSE) {
+dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse", log = FALSE, 
+                    multicore = !is.null(cluster), ncores = detectCores() - 1, cluster = NULL) {
   ## X[i,j] is ith rep of jth variable; y is vector of variables.
   ## evaluate saddle point approximation based on empirical CGF
   if( !is.matrix(X) ) X <- matrix(X, length(X), 1)
+  
+  if( multicore ){ 
+    # Force evaluation of everything in the environment, so it will available on cluster
+    .forceEval(ALL = TRUE)
+    
+    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik", exportALL = TRUE)
+    cluster <- tmp$cluster
+    ncores <- tmp$ncores
+    clusterCreated <- tmp$clusterCreated
+    registerDoSNOW(cluster)
+  }
   
   d <- ncol(X)
   
   # Offsetting dimensionality, so decay stays pretty much at the same level for any d.
   decay <- decay / ( d ^ 2 )
   
-  if( !is.matrix(y) && d > 1 ) y <- matrix(y, 1, ncol(X))
+  if( !is.matrix(y) && d > 1 ) y <- matrix(y, 1, d)
   
   # Pre-calculating covariance
   #preCov <- .robCov(t(X), alpha2 = 4, beta2 = 1.25)
@@ -48,22 +60,29 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
   # Weighting the statistics in order to downweight outliers
   X <- preCov$weights * X
   
-  tmp <- alply(y,
-               1,
-               .dsaddle,
-               X = X,
-               preCov = preCov,
-               tol = tol,
-               decay = decay,
-               deriv = deriv,
-               mixMethod = mixMethod,
-               log = log
-  )
+  # Divide saddlepoint evaluations between cores
+  withCallingHandlers({
+    tmp <- alply(y, 1, .dsaddle, .parallel = multicore,
+                 # Args for .dsaddle()
+                 X = X,
+                 preCov = preCov,
+                 tol = tol,
+                 decay = decay,
+                 deriv = deriv,
+                 mixMethod = mixMethod,
+                 log = log)}, warning = function(w) {
+                   # There is a bug in plyr concerning a useless warning about "..."
+                   if (length(grep("... may be used in an incorrect context", conditionMessage(w))))
+                     invokeRestart("muffleWarning")
+                 })
+  
+  # Close the cluster if it was opened inside this function
+  if(multicore && clusterCreated) stopCluster(cluster)
   
   out <- list( "llk" = sapply(tmp, "[[", "llk"),
                "mix" = sapply(tmp, "[[", "mix"),
                "grad" = if(deriv) t( sapply(tmp, "[[", "grad") ) else NULL
-             )
+  )
   
   return( out )
   
@@ -91,7 +110,7 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
   }
   
   n <- nrow(X)
-    
+  
   # Initial guess of the root is the solution to the Gaussian case
   # the gain is one step less of Newton on average.
   lambda <- drop( crossprod(preCov$E, preCov$E %*% (y - preCov$mY)) )
@@ -126,7 +145,7 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
     
     # Try solve scaled linear system fast, if that doesn't work use QR decomposition.
     d.lambda <- - drop( D %*% tryCatch(solve(D%*%b$d2K%*%D, D%*%(b$dK-y), tol = 0), error = function(e) qr.solve(D%*%b$d2K%*%D, D%*%(b$dK-y), tol = 0)) )
-                       
+    
     lambda1 <- lambda + d.lambda ## trial lambda
     
     b1 <- .ecgf(lambda1, X, kum1 = preCov$mY, kum2 = preCov$COV, mix = mix, grad = 2, mixMethod = mixMethod)

@@ -86,9 +86,10 @@ selectDecay <- function(decay,
   # Get cross-validated negative log-likelihood for each dataset
   withCallingHandlers({
     tmp <- llply(datasets, .selectDecay, 
-                 .progress = "text", .parallel = multicore, 
+                 .progress = "text", 
                  # Extra args for .selectDecay
-                 decay = decay, K = ctrl$K, mixMethod = ctrl$mixMethod, nNorm = ctrl$nNorm) 
+                 decay = decay, K = ctrl$K, mixMethod = ctrl$mixMethod, nNorm = ctrl$nNorm, 
+                 multicore = multicore, ncores = ncores, cluster = cluster) 
   }, warning = function(w) {
     # There is a bug in plyr concerning a useless warning about "..."
     if (length(grep("... may be used in an incorrect context", conditionMessage(w))))
@@ -139,7 +140,7 @@ selectDecay <- function(decay,
 # Internal R function
 ########
 
-.selectDecay <- function(X, decay, K, mixMethod, nNorm)
+.selectDecay <- function(X, decay, K, mixMethod, nNorm, multicore = multicore, ncores = ncores, cluster = cluster)
 {
   if( !is.matrix(X) ) X <- matrix(X, length(X), 1)
   
@@ -162,14 +163,16 @@ selectDecay <- function(decay,
   for(ii in 1:ngrid)
   {
     
-    normConst[ ii ] <- mean( dsaddle(y = sam, X = X, decay = decay[ii], mixMethod = mixMethod, log = FALSE)$llk /  dmvn(sam, colMeans(X), cov(X)) )
+    normConst[ ii ] <- mean( dsaddle(y = sam, X = X, decay = decay[ii], mixMethod = mixMethod, log = FALSE, 
+                                     multicore = multicore, ncores = ncores, cluster = cluster)$llk /  dmvn(sam, colMeans(X), cov(X)) )
     
     negLogLik[ii, ] <- aaply(1:K, 
                              1,
                              function(input){
                                index <- which(folds == input)
                                -sum( dsaddle(X[index, , drop = F], X = X[-index, , drop = F], 
-                                             decay = decay[ii], mixMethod = mixMethod, log = TRUE)$llk ) + length(index) * log(normConst[ ii ])
+                                             decay = decay[ii], mixMethod = mixMethod, log = TRUE, 
+                                             multicore = multicore, ncores = ncores, cluster = cluster)$llk ) + length(index) * log(normConst[ ii ])
                              })
     
   }
