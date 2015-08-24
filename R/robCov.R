@@ -14,12 +14,12 @@
 #'                          numerical calculations.
 #' @return A list where:
 #'         \itemize{
-#'         \item{\code{COV}}{The estimated covariance matrix.}
-#'         \item{\code{E}}{a square root of the inverse covariance matrix. i.e. the inverse cov 
+#'         \item{\code{COV}}{ The estimated covariance matrix.}
+#'         \item{\code{E}}{ A square root of the inverse covariance matrix. i.e. the inverse cov 
 #'                         matrix is \code{t(E)\%*\%E};}
-#'         \item{\code{half.ldet.V}}{Half the log of the determinant of the covariance matrix;}
-#'         \item{\code{mY}}{The estimated mean;} 
-#'         \item{\code{sd}}{The estimated standard deviations of each variable.}
+#'         \item{\code{half.ldet.V}}{ Half the log of the determinant of the covariance matrix;}
+#'         \item{\code{mY}}{ The estimated mean;} 
+#'         \item{\code{sd}}{ The estimated standard deviations of each variable.}
 #'          }
 #' @references Krzanowski, W.J. (1988) Principles of Multivariate Analysis. Oxford.
 #'             Campbell, N.A. (1980) Robust procedures in multivariate analysis I: robust covariance estimation. JRSSC 29, 231-237. 
@@ -95,7 +95,7 @@ robCov <- function(sY, alpha=2, beta=1.25) {
   
   R <- qr.R(qr(w*t(sY1)))/sqrt(sum(w*w)-1) ## Va = DR'RD
   sd <- rowSums((D*t(R))^2)^.5
-  E <- t(Di*backsolve(R,diag(nrow(R))))                   ## V^{-1} = E'E 
+  E <- t(Di * backsolve(R, diag(nrow(R))))    ## V^{-1} = E'E 
   half.ldet.V <- sum(log(abs(diag(R)))) + sum(log(D))
   COV <- tcrossprod(t(R)/Di, t(R)/Di) #Covariance matrix
   

@@ -78,6 +78,8 @@ selectDecay <- function(decay,
     ncores <- tmp$ncores
     clusterCreated <- tmp$clusterCreated
     registerDoSNOW(cluster)
+    
+    if( ctrl$K %% ncores ) message(paste("Number of folds (", ctrl$K, ") is not a multiple of ncores (", ncores, ").", sep = ''))
   }
   
   #  We simulate data
@@ -85,8 +87,7 @@ selectDecay <- function(decay,
     
   # Get cross-validated negative log-likelihood for each dataset
   withCallingHandlers({
-    tmp <- llply(datasets, .selectDecay, 
-                 .progress = "text", 
+    tmp <- llply(datasets, .selectDecay,  
                  # Extra args for .selectDecay
                  decay = decay, K = ctrl$K, mixMethod = ctrl$mixMethod, nNorm = ctrl$nNorm, 
                  multicore = multicore, ncores = ncores, cluster = cluster) 
@@ -157,23 +158,30 @@ selectDecay <- function(decay,
   rownames(negLogLik) <- decay
   colnames(negLogLik) <- 1:K
   
-  sam <- rmvn(nNorm, colMeans(X), cov(X))
+  if( nNorm ) sam <- rmvn(nNorm, colMeans(X), cov(X))
   # For each value of "decay" and for each fold, calculate the negative log-likelihood 
   # of the sample points belonging to that fold.
   for(ii in 1:ngrid)
   {
+    message( paste("decay =", decay[ii]) )
     
-    normConst[ ii ] <- mean( dsaddle(y = sam, X = X, decay = decay[ii], mixMethod = mixMethod, log = FALSE, 
-                                     multicore = multicore, ncores = ncores, cluster = cluster)$llk /  dmvn(sam, colMeans(X), cov(X)) )
+    if( nNorm ) {
+      
+      normConst[ ii ] <- mean( dsaddle(y = sam, X = X, decay = decay[ii], mixMethod = mixMethod, log = FALSE, 
+                                     multicore = multicore, ncores = ncores, cluster = cluster)$llk / dmvn(sam, colMeans(X), cov(X)) )
+      
+    }
     
     negLogLik[ii, ] <- aaply(1:K, 
                              1,
                              function(input){
                                index <- which(folds == input)
                                -sum( dsaddle(X[index, , drop = F], X = X[-index, , drop = F], 
-                                             decay = decay[ii], mixMethod = mixMethod, log = TRUE, 
-                                             multicore = multicore, ncores = ncores, cluster = cluster)$llk ) + length(index) * log(normConst[ ii ])
-                             })
+                                             decay = decay[ii], mixMethod = mixMethod, log = TRUE)$llk ) + 
+                                             ifelse(nNorm, length(index) * log(normConst[ ii ]), 0)
+                             }, 
+                             .progress = "text",
+                             .parallel = multicore)
     
   }
   

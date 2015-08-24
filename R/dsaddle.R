@@ -93,7 +93,9 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
 # INTERNAL
 ##########
 
-.dsaddle <- cmpfun(function(y, X, preCov, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse", log = FALSE) {
+.dsaddle <- cmpfun(function(y, X, preCov, tol=1e-6, decay = 0.5, 
+                            deriv = FALSE, mixMethod = "mse", 
+                            maxit = 100, log = FALSE) {
   ## X[i,j] is ith rep of jth variable; y is vector of variables.
   ## evaluate saddle point approximation based on empirical CGF
   
@@ -137,7 +139,7 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
   ## Newton loop to minimize K(lambda) - t(lambda)%*%y or solve dK(lambda) = y wrt lambda
   kk <- jj <- 1
   # Convergence test: see [con_test] below.
-  while( any( abs(b$dK-y) / sqrt(diag(preCov$COV)) > tol ) && kk < 100 ) 
+  while( any( abs(b$dK-y) / sqrt(diag(preCov$COV)) > tol ) && kk < maxit ) 
   { 
     kk <- kk + 1
     
@@ -172,7 +174,7 @@ dsaddle <- function(y, X, tol=1e-6, decay = 0.5, deriv = FALSE, mixMethod = "mse
     
   } ## end of Newton loop
   ## lambda is the SPA lambda...
-  
+    
   if(kk > 50 || jj > 20) warning(paste("The convergence of the saddlepoint root-finding is quite slow! \n",
                                        "Outer root-finding Newton-Raphson:", kk, "iter \n",
                                        "Inner line search for Arminjo condition:", jj, "iter"))

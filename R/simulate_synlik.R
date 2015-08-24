@@ -64,7 +64,13 @@
   # Close the cluster if it was opened inside this function
   if(multicore && clusterCreated) stopCluster(cluster)
   
-  simul <- do.call("rbind", tmp)
+  # We can't call rbind if we are simulating row data, as we don't know it's form (matrix, list, ect)
+  if( length(coresSchedule) == 1 )
+  {
+    simul <- tmp[[1]]
+  } else {
+    if( stats ) simul <- do.call("rbind", tmp)
+  }
   
   # Cleaning the stats from NANs
   if( clean ) simul <- .clean(X = simul, verbose = verbose)$cleanX

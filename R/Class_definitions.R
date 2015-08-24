@@ -348,7 +348,9 @@ setClass("smcmc",
                                       resultGrad = "matrix",
                                       resultHess  = "list",
                                       resultCovar = "list",
-                                      resultLoglik = "numeric"
+                                      resultLoglik = "numeric",
+                                      
+                                      storage = "list"
                       ),
                       prototype = prototype(initPar = numeric(),
                                             niter   = 0L,
@@ -365,7 +367,9 @@ setClass("smcmc",
                                             resultGrad = matrix( , 0, 0),
                                             resultHess = list(),
                                             resultCovar = list(),
-                                            resultLoglik = numeric()
+                                            resultLoglik = numeric(),
+                                            
+                                            storage = list()
                       ),
                       contains = "synlik",
                       validity = .check.synMaxlik)
