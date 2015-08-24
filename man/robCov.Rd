@@ -13,12 +13,13 @@ robCov(sY, alpha = 2, beta = 1.25)
   \item{beta}{tuning parameter, see details.}
 }
 \value{
-A list where: \itemize{ \item{\code{E}}{a square root of
-the inverse covariance matrix. i.e. the inverse cov matrix
-is \code{t(E)\%*\%E};} \item{\code{half.ldet.V}}{Half the
-log of the determinant of the covariance matrix;}
-\item{\code{mY}}{The estimated mean;} \item{\code{sd}}{The
-estimated standard deviations of each variable.} }
+A list where: \itemize{ \item{\code{COV}}{ The estimated
+covariance matrix.} \item{\code{E}}{ A square root of the
+inverse covariance matrix. i.e. the inverse cov matrix is
+\code{t(E)\%*\%E};} \item{\code{half.ldet.V}}{ Half the log
+of the determinant of the covariance matrix;}
+\item{\code{mY}}{ The estimated mean;} \item{\code{sd}}{
+The estimated standard deviations of each variable.} }
 }
 \description{
 Obtains a robust estimate of the covariance matrix of a

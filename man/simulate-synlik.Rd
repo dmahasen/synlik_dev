@@ -4,7 +4,8 @@
 \title{Simulate data or statistics from an object of class \code{synlik}.}
 \usage{
 \S4method{simulate}{synlik}(object, nsim, seed = NULL, param = object@param,
-  stats = FALSE, clean = TRUE, verbose = TRUE, ...)
+  stats = FALSE, clean = TRUE, multicore = !is.null(cluster),
+  cluster = NULL, ncores = detectCores() - 1, verbose = TRUE, ...)
 }
 \arguments{
   \item{object}{An object of class \code{synlik}.}

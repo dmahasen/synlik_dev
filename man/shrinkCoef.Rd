@@ -3,6 +3,7 @@
 \title{Get coefficients of ridge regression or lasso}
 \usage{
 shrinkCoef(object, nsim, mu, sigma, type = "ridge", constr = list(),
+  multicore = FALSE, ncores = detectCores() - 1, cluster = NULL,
   verbose = TRUE, clean = TRUE, ...)
 }
 \arguments{

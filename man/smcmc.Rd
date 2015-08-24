@@ -3,9 +3,9 @@
 \title{MCMC parameter estimation for objects of class \code{synlik}.}
 \usage{
 smcmc(object, initPar, niter, nsim, propCov, burn = 0, nchains = 1,
-  priorFun = function(param, ...) 0, targetRate = NULL, recompute = FALSE,
-  multicore = !is.null(cluster), cluster = NULL, ncores = detectCores() -
-  1, control = list(), ...)
+  saddle = FALSE, priorFun = function(param, ...) 0, targetRate = NULL,
+  recompute = FALSE, multicore = !is.null(cluster), cluster = NULL,
+  ncores = detectCores() - 1, control = list(), ...)
 }
 \arguments{
   \item{object}{An object of class \code{synlik}.}

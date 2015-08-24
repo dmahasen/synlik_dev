@@ -3,7 +3,8 @@
 \title{Creates a summaries function using ridge regression or lasso}
 \usage{
 shrinkStat(object, nsim, mu, sigma, type = "ridge", constr = list(),
-  clean = TRUE, verbose = TRUE, ...)
+  clean = TRUE, multicore = FALSE, ncores = detectCores() - 1,
+  cluster = NULL, verbose = TRUE, ...)
 }
 \arguments{
   \item{object}{An object of class "synlik".}

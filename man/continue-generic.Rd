@@ -1,16 +1,24 @@
 \docType{methods}
-\name{continue}
+\name{continue,smcmc-method}
 \alias{continue}
 \alias{continue,smcmc-method}
+\alias{continue,sml-method}
 \title{Continuing estimation.}
 \usage{
-continue(object, ...)
-
 \S4method{continue}{smcmc}(object, niter = object@niter, nsim = object@nsim,
   propCov = object@propCov, priorFun = object@priorFun,
   targetRate = object@targetRate, recompute = object@recompute,
   multicore = object@multicore, ncores = object@ncores, cluster = NULL,
   control = object@control, ...)
+
+\S4method{continue}{sml}(object, initCov = object@initCov, np = object@np,
+  nsim = object@nsim, niter = object@niter, alpha = object@alpha,
+  priorFun = object@priorFun, temper = rep(1, niter),
+  recycle = object@recycle, multicore = object@multicore,
+  ncores = object@ncores, cluster = NULL, constr = object@constr,
+  verbose = FALSE, ...)
+
+continue(object, ...)
 }
 \arguments{
   \item{object}{An object representing the results of an
@@ -36,6 +44,12 @@ parameters are defaulted to the corresponding slots in the
 input object, with the exception of cluster. The chain
 restarts were it ended, burn-in is set to zero, the same
 prior (if any) is used.
+
+When \code{is("sml", object) == TRUE} continues SML
+estimation of an object of class \code{sml}. All input
+parameters are defaulted to the corresponding slots in the
+input object, with the exception of cluster. The optimizer
+restarts were it ended.
 }
 \seealso{
 For examples, see \code{\link{smcmc-class}}.

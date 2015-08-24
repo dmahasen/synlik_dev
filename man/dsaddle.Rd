@@ -3,7 +3,8 @@
 \title{Empirical saddlepoint density}
 \usage{
 dsaddle(y, X, tol = 1e-06, decay = 0.5, deriv = FALSE,
-  mixMethod = "mse", log = FALSE)
+  mixMethod = "mse", log = FALSE, multicore = !is.null(cluster),
+  ncores = detectCores() - 1, cluster = NULL)
 }
 \arguments{
   \item{y}{Point at which the SPA is evaluated (d
