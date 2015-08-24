@@ -6,22 +6,21 @@
 
 .updateParams <- function(currPar, 
                           grad, 
-                          currCov,
-                          oldCov, 
-                          gain = 1, 
-                          constr = list(), 
-                          quant = 0.1 )
+                          covar,
+                          gain, 
+                          constr, 
+                          quant)
 {
-  stopifnot( is.vector(currPar), is.vector(grad), is.matrix(currCov) )
+  stopifnot( is.vector(currPar), is.vector(grad), is.matrix(covar) )
   
   nPar <- length( grad )
   
   # Propose a jump and limit its length so that it doesn't go
   # behond a certain quantile of the local normal model
-  delta <- drop( gain * currCov %*% grad )
+  delta <- drop( gain * covar %*% grad )
   
   lim <- qchisq(quant, nPar)
-  quad <- drop( crossprod(delta, qr.solve(oldCov, delta)) )
+  quad <- drop( crossprod(delta, qr.solve(covar, delta)) )
   delta <- delta * min( 1, sqrt(lim / quad) )
   
   newPar <- currPar - delta
@@ -33,9 +32,88 @@
     newPar[constr$indexes] <- pmax(newPar[constr$indexes], constr$lower)
   }
   
-  return(round(newPar, 14))
+  return( newPar )
   
 }
+
+# Estimated the hessian using a moving average, which discards negative
+# definite hessians and outliers
+# Arguments:
+# - initHess: initial Hessian, useful at initialization (when length(hess) < lag).
+# - hess: list of hessian from past iterations.
+# - lag: number of past hessians considered.
+# - zmax: z value used to discard the hessians the are too distant from the median
+#         hessian.
+# - inLag: maximum number of "initHess" to be concatenated to "hess" if the latter
+#          is shorter than "lag". Useful when you want to have large "lag", but you
+#          do not want to patch "initHess" lot of time at the beginning.
+.getHessian <- function(initHess, hess, lag, zmax, inLag)
+{
+  
+  # Remove hessians that are not positive definite
+  eig <- sapply(hess, function(mat) min(eigen(mat, only.values = TRUE)$values)) 
+  hess <- hess[ eig > 1e-14 ]
+  
+  hess <- tail(hess, min(lag, length(hess)))
+  
+  # Are we still in an early iteration (iter < lag)? 
+  # If yes, we might have enough hessians, the first one is repeated npatch times
+  npatch <- max(lag - length(hess), 0) 
+    
+  if( npatch ){ hess <- c(rlply(min(npatch, inLag), {initHess}), hess) }
+    
+  hess <- abind(hess, along = 3)
+  
+  # Median hessian (elementwise)
+  med <- apply(hess, c(1, 2), median) 
+  
+  # Log sum of absolute of (elemetwise) differences from median Hessian 
+  dist <- abs( sweep(hess, 1:2, med) )
+  dist <- sqrt( apply(dist, 3, sum) )
+  
+  # Testing which hessian are outliers           
+  dist_m <- median(dist)                   # Median
+  dist_sd <- median( abs(dist - dist_m) )  # MAD
+  
+  # Calculate the indexes of the hessians to be used in the moving average
+  # If(dist_sd == 0) the MAD is zero, hence the median hessian initial one
+  # (1:length(z) <= npatch) is used to keep using the initial hessian as much
+  # as we can, for robustness.
+  good <- if(dist_sd == 0){ 
+    
+    which( dist == 0 )
+    
+  } else {
+    
+    z <- abs( (dist - dist_m) / dist_sd )
+    
+    which( z < zmax | (1:length(z) <= npatch) )
+    
+  }
+  
+  print(good)
+   
+  out <- apply(hess[ , , good], 1:2, mean)
+  
+  return( out )
+  
+}
+
+# Test for .getHessian
+# library(plyr)
+# library(MCMCpack)
+# 
+# m <- rlply(100, rwish(100, matrix(c(1,.3,.3,1), 2, 2)))
+# 
+# m[[101]] <- rwish(100, matrix(c(2,.7,.7,1.2), 2, 2))
+# 
+# .getHessian(hess = m, lag = 10, zmax = 3)
+# 
+# m <- rlply(5, rwish(100, matrix(c(1,.3,.3,1), 2, 2)))
+# 
+# m[[6]] <- rwish(100, matrix(c(2,.7,.7,1.2), 2, 2))
+# 
+# .getHessian(hess = m, lag = 10, zmax = 3)
 
 
 
@@ -65,33 +143,14 @@
       print(diag(covar))
     }
     
-    corr <- diag(sqrt(diag(covar))^-1, nPar)%*%covar%*%diag(sqrt(diag(covar))^-1, nPar)
+    corr <- cov2cor( covar ); 
     sdev <- sqrt(diag(covar))
     sdev <- pmax( pmin(sdev, sqrt(upLim)), sqrt(lowLim))
-    covar  <- diag(sdev, nPar)%*%corr%*%diag(sdev, nPar)
+    covar  <- diag(sdev, nPar) %*% corr %*% diag(sdev, nPar)
   }
   
-  round(covar, 14)
+  return( covar )
 }
-
-####
-
-.mahaMovAv <- function(pos, Cov, oldPos, oldGrad, oldHess, redux = 1e-1, quant = 0.1)
-{
-  nPar <- length(pos)
-  
-  dist <- mahalanobis(oldPos, pos, cov = Cov * redux)
-  w <- exp( -dist )
-  w[ dist > qchisq(quant, nPar) ] <- 0.0
-  w <- w / sum(w)
-
-  grad <- colSums( oldGrad * w )
-
-  hess <- Reduce("+", mapply("*", oldHess, w, SIMPLIFY = F) ) 
-  
-  list("grad" = grad, "hess" = hess)
-}
-
 
 #########
 #### The stochastic optimization routine
@@ -125,10 +184,14 @@
 #' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>
 #' @export
  
-synMaxlik <- function(object, nIter, nsim, initCov, initPar = object@param, 
-                       addRegr = TRUE, constr = list(), control = list(),
-                       multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, 
-                       verbose = FALSE,  ...)
+synMaxlik <- function(object, nIter, nsim, 
+                      initCov, initPar = object@param, 
+                      nBoot = 0,
+                      adapt = FALSE,
+                      fixVar = TRUE,
+                      addRegr = TRUE, constr = list(), control = list(),
+                      multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, 
+                      verbose = FALSE,  ...)
 {
   if(!is(object, "synlik")) stop("object has to be of class \"synlik\" ")
   
@@ -144,13 +207,14 @@ synMaxlik <- function(object, nIter, nsim, initCov, initPar = object@param,
   # Setting up control parameter
   ctrl <- list( "gain" = 1, 
                 "gainExp" = 0.602, 
-                "lag" = 1,
-                "maxLag" = 30,
-                "lagGrow" = 0.333,
-                "limCov" = list("upper" = diag(currCov) * 10, "lower" = diag(currCov) * 0.1),
-                "quant" = 0.9,
-                "initGrad" = numeric(nPar),
-                "initHess" = solve(currCov) )
+                "lag" = max(round(nIter / 3), 1),
+                "limCov" = list("upper" = diag(currCov) * Inf, 
+                                "lower" = diag(currCov) * 0),
+                "quant" = 0.25,
+                "zmax" = 2, 
+                "inLag" = max(round(nIter / 3), 1),
+                "initHess" = solve(currCov),
+                "recycle" = FALSE)
   
   # Checking if the control list contains unknown names
   # Entries in "control" substitute those in "ctrl"
@@ -165,13 +229,8 @@ synMaxlik <- function(object, nIter, nsim, initCov, initPar = object@param,
                length(constr$indexes) == length(constr$lower), all(constr$upper > constr$lower)
                ) 
     
+  # Create decreasing gain sequence
   gainSeq <- ctrl$gain / ( (1:nIter) ^ ctrl$gainExp )
-  
-  gradient <- numeric(nPar)
-  hessian_hat <- hessian_hat_hat <- matrix(NA, nPar, nPar)
-  
-  oldGradient <- ctrl$initGrad
-  oldHessian <- ctrl$initHess
   
   # I will store the results here
   resultPar <- resultGrad <- matrix(NA, nIter, nPar)
@@ -186,50 +245,47 @@ synMaxlik <- function(object, nIter, nsim, initCov, initPar = object@param,
     clusterCreated <- tmp$clusterCreated
   }
   
-  currLag <- ctrl$lag
+  # List where recycled values, parameters and weights will be stored
+  storage <- list()
   
   # The main loop of the optimization
   for(ii in 1:nIter)
   {
-    
-    currLag <- min(currLag + ctrl$lagGrow, ctrl$maxLag)
-    
     # Calculate gradient and hessian                     
-    tmp <- synGradient(object, param = currPar, nsim = nsim, covariance = currCov, addRegr, constr = constr, 
-                       multicore = multicore, ncores = ncores, cluster = cluster, ...)  
-    
-    tmpGrad <- resultGrad[ii, ] <- -round(tmp$gradient, 14) 
-    hessian_hat <- resultHess[[paste("Iter", ii, sep = "")]] <- -round(tmp$hessian, 14)
+    tmp <- synGrad(object, param = currPar, nsim = nsim, covariance = currCov, 
+                   addRegr = addRegr, fixVar = fixVar, nBoot = nBoot, constr = constr, 
+                   multicore = multicore, ncores = ncores, cluster = cluster, ...)  
+      
+    gradient <- resultGrad[ii, ] <- - tmp$gradient
+    resultHess[[paste("Iter", ii, sep = "")]] <- - tmp$hessian
     resultLoglik[ii] <- tmp$llk
+    storage[[ii]] <- tmp[["stored"]]
     
-    # Gradient and Hessian are weighted averages of current and past values
-    resultPar[ii, ] <- currPar
-    tmp <- .mahaMovAv(pos = currPar, Cov = currCov, oldPos = resultPar[1:ii, , drop = F], 
-                      oldGrad = resultGrad[1:ii, , drop = F], oldHess = resultHess[1:ii])
-    gradient <- tmp$grad
-    hessian_hat <- tmp$hess
-#     gradient <- currLag/(1+currLag) * oldGradient + 1/(1+currLag) * tmpGrad
-#     oldGradient  <- tmpGrad
-#     
-#     hessian_hat <- currLag/(1+currLag) * oldHessian + 1/(1+currLag) * hessian_hat
-#     oldHessian <- hessian_hat
+    # Get Hessian from moving average
+    hessian_hat <- .getHessian(ctrl$initHess, resultHess, lag = ctrl$lag, zmax = ctrl$zmax, inLag = ctrl$inLag)
     
     # Get the covariance which will be used to simulate the parameters at the next iteration
-    oldCov <- currCov
-    currCov <- .getCovariance(hessian = hessian_hat, upLim = ctrl$limCov$upper, lowLim = ctrl$limCov$lower)
-    
-    oldPar <- currPar
-    
-    # Update paramters values
+    if( adapt )
+    {
+      currCov <- .getCovariance(hessian = hessian_hat, upLim = ctrl$limCov$upper, lowLim = ctrl$limCov$lower)
+    } 
+   
+    # Update parameters values
     currPar <- .updateParams(currPar = currPar, grad = gradient, 
-                             currCov = currCov, oldCov = oldCov,
+                             covar = currCov, 
                              gain = gainSeq[ii], 
-                             constr = constr)
+                             constr = constr, quant = ctrl$quant)
+    
+    oldCov <- currCov
+    oldPar <- currPar
         
     resultPar[ii, ] <- currPar
     resultCovar[[paste("Iter", ii, sep = "")]] <- currCov
     
-    if(verbose) print( paste("Iteration", ii, ", parameters =", currPar ) )
+    if(verbose){ 
+      print( paste("Iteration", ii, ", parameters =", currPar ) )
+      print( currCov )
+    }
     
   }
   
@@ -241,307 +297,29 @@ synMaxlik <- function(object, nIter, nsim, initCov, initPar = object@param,
   
   # Setting up control list for "continue.synMaxlik" method
   toContinue <- ctrl
-  toContinue$initGrad <- oldGradient
-  toContinue$initHess <- oldHessian
-  toContinue$lag <- currLag
+  toContinue$initHess <- hessian_hat
   toContinue$gain <- tail(gainSeq, 1) 
   
   ### Class Definition
   .synMaxlik( object,
               initPar = initPar,
-              nIter   = nIter,
-              nsim    = nsim,
+              niter   = as.integer(nIter),
+              nsim    = as.integer(nsim),
               initCov = initCov,
               addRegr  = addRegr,
               constr = constr,
               control = ctrl,
               continueCtrl = toContinue,
               multicore = multicore,
-              ncores = ncores,
+              ncores = as.integer(ncores),
                                         
               resultPar = resultPar,
               resultGrad = resultGrad,
               resultHess = resultHess,
               resultCovar = resultCovar,
-              resultLoglik = resultLoglik)
+              resultLoglik = resultLoglik, 
+              storage = storage)
   
 }
 
 
-############################
-##### Function to estimate gradient and hessian of synthetic likelihood
-############################
-# This is Simon's local regression to get gradient and hessian with one modification:
-# the second regression (the one involving the residuals) is linear not quadratic. This is suggested 
-# by the article "Local Polynomial Variance-Function Estimation" since the variance shouldn't need non linear
-# terms locally. 
-# 
-#' Estimate gradient and hessian of the synthetic likelihood.
-#' 
-#' @param object an object of class "synlik".
-#' @param param (numeric) vector containing the current values of the model's parameters.
-#' @param nsim   (integer) number of simulated statistics.
-#' @param covariance (matrix) covariance matrix used to simulate the parameters.
-#' @param addRegr (logical). 
-#'           If FALSE the statistics calculated by object@@summaries will be used (SL approach);
-#'           if TRUE the simulated parameters will be regressed on the statistics and the 
-#'           fitted values of the paramaters given the _observed_ statistics will be used as statistics
-#'           (referred to as SL+ approach).
-#' @param constr (named list) used to impose constraints on the parameters.
-#'           Composed of 3 elements:
-#'           [["indexes"]] = (numeric integers) indexes of the elements to check;
-#'           [["upper"]]   = (numeric) upper bounds for the elements in "indexes";
-#'           [["lower"]]   = (numeric) lower bounds for the elements in "indexes".
-#' @param multicore  (logical) if TRUE the object@@simulator and object@@summaries functions will
-#'                    be executed in parallel. That is the nsim simulations will be divided in multiple cores.
-#' @param ncores  (integer) number of cores to use if multicore == TRUE.
-#' @param cluster an object of class c("SOCKcluster", "cluster"). This allowes the user to pass her own cluster,
-#'                which will be used if multicore == TRUE. The user has to remember to stop the cluster. 
-#' @param ... additional arguments to be passed to object@@simulator and object@@summaries.
-#'            In general I would avoid using it and including in those two function everything they need.
-#'
-#' @return  a list containing: ["gradient"] = (numeric) estimated gradient of the synthetic log-likelihood at currPar;
-#'                          ["hessian"]  = (matrix) estimated hessian of the synthetic log-likelihood at currPar;  
-#'                          ["llk"]      = (scalar) estimated value of the synthetic log-likelihood at currPar.
-#' @author Matteo Fasiolo <matteo.fasiolo@@gmail.com>                         
-#' @export
-#' 
-synGradient <- cmpfun(function(object, param, nsim, covariance, addRegr = TRUE, constr = list(), 
-                               multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, 
-                               tolVar = 10 * .Machine$double.eps, ...)
-{
-  if(!is(object, "synlik")) stop("object has to be of class \"synlik\" ")
-  
-  # Reduce the object to "synlik" so that I avoid moving around all the additional slots of the "synMaxlik" class (for example)
-  if( !class(object)[[1]] != "synlik" ) object <- as(object, "synlik")
-  
-  theData <- object@data
-  
-  nPar <- length(param)
-  
-  param <- unname(param)
-  covariance <- unname(covariance)
-  
-  if(multicore)
-  { 
-    tmp <- .clusterSetUp(cluster = cluster, ncores = ncores, libraries = "synlik") 
-    cluster <- tmp$cluster
-    ncores <- tmp$ncores
-    clusterCreated <- tmp$clusterCreated
-    
-    coresSchedule <- c( rep(floor(nsim / ncores), ncores - 1), floor(nsim / ncores) + nsim %% ncores)
-    
-    tmplist <- clusterApply( cluster, 
-                             coresSchedule, 
-                             function(input, ...)
-                             {
-                               # Simulate parameters and data
-                               simulParams <- .paramsSimulator(theMean = param, covar = covariance, nsim = input, constr = constr)
-                               
-                               simulStats <- simulate.synlik(object, param = simulParams, nsim = input, stats = TRUE, clean = FALSE, verbose = FALSE, ...)
-                               
-                               return( list("simulParams" = simulParams, "simulStats" = simulStats) )
-                             } 
-                             , ... )
-    
-    simulParams <- do.call(rbind, lapply( tmplist, function(input) input$simulParams ) )
-    simulStats  <- do.call(rbind, lapply( tmplist, function(input) input$simulStats ) )
-    rm(tmplist)
-    
-    if(clusterCreated) cluster <- stopCluster(cluster)
-    
-  } else{
-    
-    # Simulate parameters and data
-    simulParams <- .paramsSimulator(theMean = param, covar = covariance, nsim = nsim, constr = constr)
-    simulStats  <- simulate.synlik(object, param = simulParams, nsim = nsim, stats = TRUE, clean = FALSE, verbose = FALSE, ...)  
-    
-  }
-  
-  clean <- .clean(X = simulStats, verbose = TRUE)
-  if(clean$nBanned > 0){
-    simulStats <- clean$cleanX
-    simulParams <- simulParams[-clean$banned, ]
-  }
-  rm(clean)
-  
-  nGood <- nrow(simulStats)
-
-  # if addRegr == TRUE we use SL+ and we regress parameters on statistics 
-  if(addRegr){ 
-    simulStats <- cbind(1, simulStats)
-    nStats <- nPar
-    
-    qrx <- qr(simulStats, tol = 0)
-    # matrix of linear regs coeffs for all summary statistics
-    fearn_beta <- t( qr.coef(qrx, simulParams) )
-    fearn_beta[is.na(fearn_beta)] <- 0 # Putting to zero the regression coefficients that are NAs
-    
-    simulStats <- tcrossprod(fearn_beta, simulStats)
-    
-    summaries <- object@summaries
-    obserStats <- if( !is.null(summaries) ) drop( summaries(x = theData, extraArgs = object@extraArgs, ...) ) else drop( theData )
-    obserStats <- fearn_beta %*% c(1, obserStats)
-  } else{
-    simulStats <- t(simulStats)
-    nStats <- nrow(simulStats)
-    
-    summaries <- object@summaries
-    obserStats <- if( !is.null(summaries) ) drop( summaries(x = theData, extraArgs = object@extraArgs, ...) ) else drop( theData )
-  }
-  
-  ##### Regression of summary statistic (simulStats) on the parameters of each replicate (simulParams)
-  
-  X1 <- simulParams
-  X1 <- sweep(X1, 2, param)    #Center around current position
-  
-  tmpModel <- cbind(1, X1, (X1^2)/2)
-  
-  if(nPar > 1){
-    comb <- t( combn(nPar, 2) )
-    for(jj in 1:nrow(comb)){tmpModel <- cbind(tmpModel, X1[ , comb[jj, 1]] * X1[ , comb[jj, 2]])}
-  }
-  
-  X1 <- tmpModel;              # Model matrix for first regression                             
-  X2 <- X1[ , 1:(nPar+1)]      # Model matrix for second regression
-  rm(tmpModel)
-  
-  qrx1 <- qr(X1, tol = 0)
-  qrx2 <- qr(X2, tol = 0) 
-  
-  # Calculate the betas of the 1st regression
-  beta <- t( qr.coef(qrx1, t(simulStats)) )
-  beta[is.na(beta)] <- 0
-  
-  ########################################################
-  ######### Regressing entries of the covariance matrix on parameters 
-  ########################################################
-  
-  # WARNING: it is better to simulated very close to the current value of parameters,
-  # otherwise the quadratic model is biased, we get mean(res) != 0 and SIGMA_HAT is not invertible!
-  
-  # Obtaining residuals (res) in the two ways previously described.
-  res <- matrix(NA, nStats, nGood)
-  for(ii in 1:nStats) res[ii, ] <- simulStats[ii, ] - tcrossprod(beta[ii, ], X1)
-  
-  # Down-weighting the most extreme residuals
-  fixCov <- robCov(res)
-  res <- res * fixCov$weights
-  
-  # Array where the residual matrices for each path are stack one over the other.
-  Dvett <- array(NA, c(nStats, nStats, nGood))
-  for(ii in 1:nGood) Dvett[ , , ii] <- tcrossprod(res[ , ii], res[ , ii])
-  
-  # Matrix of expected SIGMA, first derivative of sigma wrt the parameters
-  # and second derivatives. (Example: SIGMA12 = (D^2 SIGMA)/(D theta1 D theta2))     
-  SIGMA_HAT <- matrix(0, nStats, nStats)
-  firstSIG <- array(NA, c(nStats, nStats, nPar))
-  
-  # Now I regress each vector D_vett[,,i] on the parameters (using the same LINEAR regression)
-  # The intercepts are the expected elements of the covariance matrix. I move along the upper triangular
-  # part of the matrix. 
-  # N.B. Since this is a LINEAR regression this code is not the same as Simon's notes. 
-  
-  for (ff in 1:nStats) for(ii in ff:nStats){ 
-    tmp <- t(qr.coef(qrx2, as.matrix(Dvett[ff, ii, ])))
-    tmp[is.na(tmp)] <- 0
-    SIGMA_HAT[ff, ii] <- SIGMA_HAT[ii, ff] <- tmp[1]
-    firstSIG[ff, ii, ] <- firstSIG[ii, ff, ] <- tmp[2:(nPar+1)]
-  }
-  
-  # Identify statistics with very low variance (diagonal elements of SIGMA_HAT)
-  # and removing them and their coefficients
-  lowVar <- which( diag(SIGMA_HAT) < tolVar )
-  if( length(lowVar) ) {
-    if( addRegr ) stop( paste("The variance of one of the parameters is  <", tolVar, ""))
-    nStats <- nStats - length(lowVar)
-    if(nStats == 0) stop( paste("All the chosen statistics have variance <", tolVar) )
-    beta <- beta[-lowVar, ]
-    obserStats <- obserStats[-lowVar]
-    firstSIG <- firstSIG[-lowVar, -lowVar, ] 
-    SIGMA_HAT <- SIGMA_HAT[-lowVar, -lowVar] 
-    warning( paste("There are", length(lowVar), "statistics with variance <", tolVar, "they were removed.") )
-  }
-  
-  # Get the (scaled) QR decomposition of SIGMA_HAT, that later I'll use to 
-  # solve several linear systems (so I avoid inverting it).
-  D <- diag(diag(SIGMA_HAT)^-0.5, nStats)
-
-  sigQR <- qr( D%*%SIGMA_HAT%*%D, tol = 0 )
-  
-  #############################################################################
-  ###### Calculate gradient and Hessian of the log-likelhood wrt the parameters
-  #############################################################################
-  
-  ######### Calculating the gradient of the synthetic likelihood
-  # DmuDth1 = the first derivatives of mu wrt the parameters 
-  # DmuDth2 = the second derivatives of mu wrt the parameters
-  # currStat = the expected value of the statistic at the current position
-  # obsRes = statistics(observed_path) - curr_stat
-  # sigByRes = SIGMA_HAT^-1 %*% (y - currStat)
-  DmuDth1 <- beta[ , 2:(nPar+1), drop = FALSE]
-  DmuDth2 <- beta[ , (nPar+2):ncol(X1), drop = FALSE]
-  currStat <- beta[ , 1]
-  obsRes <- drop( obserStats - currStat )
-  sigByRes <- drop(D %*% qr.solve(sigQR, D %*% obsRes, tol = 0))
-  
-  firstDeriv <- numeric(nPar)
-  for(kk in 1:nPar)
-  {
-    firstDeriv[kk] <- 0.5 * (2 * crossprod(DmuDth1[ , kk], sigByRes)    +     
-                               
-                               crossprod(obsRes, D %*% qr.solve(sigQR, D%*%firstSIG[ , , kk]%*%sigByRes, tol = 0)) -
-                               
-                               eSaddle:::.Trace(D %*% qr.solve(sigQR, D %*% firstSIG[ , , kk], tol = 0)) )
-  }
-  
-  
-  ######### Calculating the Hessian of the synthetic likelihood
-  # Different from Simon's document because the second regression is linear, and hence
-  # all the second derivatives of the covariance matrix wrt the paramets have been put to zero.
-  # I fill the hessian moving on the upper triangle and I use the switch to select the correct
-  # matrix of the first derivatives of the covariance wrt the parameters. 
-  
-  secondDeriv <- matrix(0, nPar, nPar)
-  
-  if(nPar == 1){
-    
-    indexes <- matrix(1, 1, 1)
-    
-  }else{
-    
-    # Create matrix of indexes to manage the second derivarives (stored in DmuDth2)
-    indexes <- diag(seq(1:nPar))
-    entries <- seq(nPar + 1, nPar + factorial(nPar)/(factorial(2)*factorial(nPar-2)))
-    zz <- 1
-    for(jj in 1:nPar){
-      indexes[jj, -(1:jj)] <- entries[zz:(zz + nPar - jj - 1)]
-      zz <- zz + nPar - jj
-    }
-  }
-  
-  
-  for(kk in 1:nPar) 
-    for(ff in kk:nPar)
-    {
-      zz <- indexes[kk, ff]
-      
-      DsigDthK <- firstSIG[ , , kk]
-      DsigDthL <- firstSIG[ , , ff]
-      
-      secondDeriv[kk, ff] <- secondDeriv[ff, kk] <-
-        0.5 * (  
-          2 * crossprod(DmuDth2[ , zz], sigByRes) - 
-            2 * crossprod(DmuDth1[ , kk], D %*% qr.solve(sigQR, D%*%(DsigDthL%*%sigByRes), tol = 0)) -
-            2 * crossprod(DmuDth1[ , kk], D %*% qr.solve(sigQR, D%*%DmuDth1[ , ff], tol = 0)) - 
-            2 * crossprod(DmuDth1[ , ff], D %*% qr.solve(sigQR, D%*%(DsigDthK%*%sigByRes), tol = 0)) -  
-            2 * crossprod(sigByRes, DsigDthL%*%(D %*% qr.solve(sigQR, D%*%(DsigDthK%*%sigByRes), tol = 0)) ) +
-            eSaddle:::.Trace(D %*% qr.solve(sigQR, D%*%DsigDthL, tol = 0) %*% (D %*% qr.solve(sigQR, D%*%DsigDthK, tol = 0)) )
-        )  
-    }
-  
-  llk <- - 0.5 * crossprod(obsRes, sigByRes) - 0.5 * log( abs( prod( diag(qr.R(sigQR)) / diag(D^2) ) ) )
-  
-  list("gradient" = firstDeriv, "hessian" = secondDeriv, "llk" = llk)
-  
-})

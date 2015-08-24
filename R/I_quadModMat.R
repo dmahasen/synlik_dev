@@ -1,11 +1,13 @@
 
 # Creates model matrix for quadratic multivariate regression 
 
-.quadModMat <- function(X)
+.quadModMat <- function(X, center = FALSE, scale = FALSE, deriv = FALSE)
 {
   nPar <- ncol(X)
   
-  M <- cbind(1, X, X ^ 2)
+  X <- scale(X, center = center, scale = scale)
+  
+  M <- cbind(1, X, X ^ 2 / ifelse(deriv, 2, 1))
      
   # Creating all mixed terms
   if(nPar > 1){

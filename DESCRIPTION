@@ -22,7 +22,8 @@ Imports:
     plyr,
     doSNOW,
     MASS,
-    mvnfast
+    mvnfast, 
+    mgcv
 Suggests: 
     knitr,
     testthat,
