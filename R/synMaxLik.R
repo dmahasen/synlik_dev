@@ -91,7 +91,7 @@
     
   }
   
-  print(good)
+  # print(good)
    
   out <- apply(hess[ , , good], 1:2, mean)
   
