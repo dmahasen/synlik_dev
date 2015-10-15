@@ -4,7 +4,7 @@ exportPattern("^[[:alpha:]]+")
 # Imported stuff
 importFrom(compiler, "cmpfun")
 
-importFrom(mvnfast, "rmvn", "dmvn", "maha", "demvn")
+importFrom(mvnfast, "rmvn", "dmvn", "maha")
 
 importFrom(methods)
 
