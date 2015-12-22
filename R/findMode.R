@@ -17,7 +17,7 @@
 #' @export
 #'
 
-findMode <- function(X, init = NULL, decay = 0.5, method = "BFGS", mixMethod = "mse", sadTol = 1e-6, ...)
+findMode <- function(X, decay, init = NULL, method = "BFGS", hess = FALSE, sadControl = list(), ...)
 {
   switch(class(X),
          "matrix"  = theData <- X,
@@ -40,14 +40,19 @@ findMode <- function(X, init = NULL, decay = 0.5, method = "BFGS", mixMethod = "
     stopifnot( is.vector(init), length(init) == ncol(theData) ) 
   }
   
-  objFun  <- function(x) -dsaddle(y = as.numeric(x), X = theData, tol = sadTol, decay = decay, log = TRUE, mixMethod = mixMethod)$llk
+  objFun  <- function(x) -dsaddle(y = as.numeric(x), X = theData, control = sadControl, decay = decay, log = TRUE)$llk
   
-  objGrad <- function(x) -dsaddle(y = as.numeric(x), X = theData, tol = sadTol, decay = decay, deriv = TRUE, mixMethod = mixMethod)$grad
-  
+  objGrad <- function(x) -dsaddle(y = as.numeric(x), X = theData, control = sadControl, decay = decay, deriv = TRUE)$grad
   
   optOut <- optim(par = init, fn = objFun, gr = objGrad, method = method, ...)
+      
+  names(optOut)[c(1, 2, 3)] <- c("mode", "logDens", "numEval")
   
-  names(optOut)[c(1, 2, 3)] <- c("mode", "log-density", "number of evaluations")
+  optOut$logDens <- - optOut$logDens
+  if(hess)
+  {
+    optOut$hess <- - .hessFromGrad(optOut$mode, objGrad, eps = sqrt(.Machine$double.eps), ...)
+  }
   
   return(optOut)
 }

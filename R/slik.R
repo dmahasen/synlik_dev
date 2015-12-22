@@ -20,12 +20,21 @@
 #' slik(ricker_sl, param = c(3.8, -1.2, 2.3), nsim = 500)                     
 #' @export
 #' 
-slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, ...) 
+slik <- function(object, param, nsim, saddle = FALSE, controlSad = list(), 
+                 multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, ...) 
 {
+  # Setting up control parameter
+  ctrlSad <- list( "decay" = 1,
+                   "normalize" = FALSE,
+                   "fastInit" = FALSE )
+  
+  ctrlSad <- .ctrlSetup(innerCtrl = ctrlSad, outerCtrl = controlSad, verbose = FALSE)
  
   .slik(object = object, 
         param = param, 
         nsim  = nsim, 
+        saddle = saddle,
+        controlSad = ctrlSad,
         multicore = multicore, 
         ncores = ncores, 
         cluster = cluster, 
@@ -37,7 +46,8 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
 # INTERNAL
 ####
 
-.slik <- function(object, param, nsim, saddle = FALSE, decay = 0.5, aux = 0, multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, ...) 
+.slik <- function(object, param, nsim, saddle, controlSad, 
+                  multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, ...) 
 {
   
   if(!is(object, "synlik")) stop("object has to be of class \"synlik\" ")
@@ -46,8 +56,6 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   if( !class(object)[[1]] != "synlik" ) object <- as(object, "synlik")
   
   if( !is.vector(param) ) stop("param should be a numeric vector.")
-  
-  if( aux && !saddle ) stop("\"aux\" is true but you are not using a saddlepoint density")
     
   simulData <- .simulate.synlik(object, 
                                 param = param, 
@@ -74,20 +82,9 @@ slik <- function(object, param, nsim, multicore = FALSE, ncores = detectCores() 
   if( saddle )
   {
     
-    out <- dsaddle(y = obsStats, X = simulData, decay = decay, log = TRUE, ...)
+    out <- dsaddle(y = obsStats, X = simulData, decay = controlSad$decay, normalize = controlSad$normalize, 
+                   fastInit = controlSad$fastInit, control = controlSad, log = TRUE)
     
-    # Correct the log-likelihood for the missing normalizing constant
-    if( aux ){
-      
-      tmp <- robCov( t(simulData) )
-      
-      auxStat <- rmvn(aux, tmp$mY, tmp$COV)
-      
-      normConst <- .meanExpTrick( dsaddle(y = auxStat, X = simulData, decay = decay, log = TRUE, ...)$llk - dmvn(auxStat, tmp$mY, tmp$COV, log = TRUE) )
-      
-      out$llk <- out$llk - log( normConst )
-      
-    }
 
   } else  {
     

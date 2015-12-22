@@ -40,7 +40,7 @@
   withCallingHandlers({
     tmp <- alply(.data = coresSchedule,
                  .margins = 1,
-                 .fun = function(input){
+                 .fun = function(input, ...){
                    # Simulate data
                    simul <- simulator(param = param, nsim = input, extraArgs = extraArgs, ...)
                    

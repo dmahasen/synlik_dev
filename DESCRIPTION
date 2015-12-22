@@ -22,11 +22,12 @@ Imports:
     plyr,
     doSNOW,
     MASS,
-    mvnfast, 
+    mvnfast,
     mgcv
-Suggests: 
+Suggests:
     knitr,
     testthat,
     stabledist
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, RcppMLPACK, BH
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1

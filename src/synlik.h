@@ -1,6 +1,7 @@
 #ifndef _SYNLIK_H
 #define _SYNLIK_H
 
+#include <RcppMLPACK.h>
 #include <RcppArmadillo.h>
 
 /*
@@ -20,6 +21,8 @@ RcppExport SEXP cleanStats(SEXP inMat);
 RcppExport SEXP checkBoundsCpp(SEXP theMean_, SEXP cholFact_, SEXP toCheck_, SEXP upper_, SEXP lower_, SEXP output_);
 
 RcppExport SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_, SEXP kum2_);
+
+RcppExport SEXP mst(SEXP X_);
 
 /*
  * Simulators
