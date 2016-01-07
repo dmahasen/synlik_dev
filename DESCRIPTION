@@ -10,6 +10,7 @@ Description: Framework to perform synthetic likelihood inference
     intractable.
 License: GPL (>=2)
 URL: http://mfasiolo.github.io/synlik_release
+Depends: esaddle
 Imports:
     Rcpp (>= 0.10.4),
     methods,
@@ -23,11 +24,12 @@ Imports:
     doSNOW,
     MASS,
     mvnfast,
-    mgcv
+    mgcv,
+    esaddle
 Suggests:
     knitr,
     testthat,
     stabledist
-LinkingTo: Rcpp, RcppArmadillo, RcppMLPACK, BH
+LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1

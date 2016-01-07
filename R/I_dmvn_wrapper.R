@@ -45,7 +45,6 @@
 #'                dmvnFast(X, mu, mcov), 
 #'                dmvnorm(X, mu, mcov))
 #' }
-#' @export dmvnFast
 
 .dmvn_wrapper <- function(X, mu, sigma, log = FALSE, isChol = FALSE, verbose = TRUE){
   
