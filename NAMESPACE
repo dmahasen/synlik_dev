@@ -32,3 +32,6 @@ importFrom(graphics, "plot")
 importFrom(Matrix, "nearPD")
 
 importFrom(mgcv, "gam", "bam", "predict.gam", "s")
+
+importFrom(matrixStats, "colMedians", "colMads", "colAnys")
+

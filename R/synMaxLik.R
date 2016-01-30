@@ -287,7 +287,7 @@ synMaxlik <- function(object, nIter, nsim,
     resultCovar[[paste("Iter", ii, sep = "")]] <- currCov
     
     if(verbose){ 
-      print( paste("Iteration", ii, ", parameters =", currPar ) )
+      cat("Iteration ", ii, ", parameters =", currPar, "\n" )
       print( currCov )
     }
     

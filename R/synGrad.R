@@ -99,6 +99,15 @@ synGrad <- cmpfun(function(object, param, nsim, covariance,
   }
   rm(clean)
   
+  # Remove outliers that lay more than 6 MADs away from the median
+  meds <- colMedians( simulStats )
+  mads <- colMads( simulStats )
+  outl <- colAnys( (abs((t(simulStats) - meds)) - 6 * mads) > 0 )
+  if( any(outl) ){
+    simulStats <- simulStats[ !outl, ]
+    simulParams <- simulParams[ !outl, ]
+  }
+  
   nGood <- nrow(simulStats)
   
   # Adding the latest component to the mixture
