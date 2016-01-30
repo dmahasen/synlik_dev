@@ -189,7 +189,8 @@ synMaxlik <- function(object, nIter, nsim,
                       nBoot = 0,
                       adapt = FALSE,
                       fixVar = TRUE,
-                      addRegr = TRUE, constr = list(), control = list(),
+                      addRegr = TRUE, 
+                      constr = list(), control = list(),
                       multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, 
                       verbose = FALSE,  ...)
 {
@@ -214,6 +215,7 @@ synMaxlik <- function(object, nIter, nsim,
                 "zmax" = 2, 
                 "inLag" = max(round(nIter / 3), 1),
                 "initHess" = solve(currCov),
+                "gradPrior" = function(param) list("gradient" = numeric(nPar), "Hessian" = diag(0, nPar)),
                 "recycle" = FALSE)
   
   # Checking if the control list contains unknown names
@@ -255,9 +257,11 @@ synMaxlik <- function(object, nIter, nsim,
     tmp <- synGrad(object, param = currPar, nsim = nsim, covariance = currCov, 
                    addRegr = addRegr, fixVar = fixVar, nBoot = nBoot, constr = constr, 
                    multicore = multicore, ncores = ncores, cluster = cluster, ...)  
+    
+    priorDer <- ctrl$gradPrior(currPar)
       
-    gradient <- resultGrad[ii, ] <- - tmp$gradient
-    resultHess[[paste("Iter", ii, sep = "")]] <- - tmp$hessian
+    gradient <- resultGrad[ii, ] <- - tmp$gradient - priorDer$gradient
+    resultHess[[paste("Iter", ii, sep = "")]] <- - tmp$hessian - priorDer$Hessian
     resultLoglik[ii] <- tmp$llk
     storage[[ii]] <- tmp[["stored"]]
     
