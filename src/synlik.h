@@ -1,7 +1,6 @@
 #ifndef _SYNLIK_H
 #define _SYNLIK_H
 
-#include <RcppMLPACK.h>
 #include <RcppArmadillo.h>
 
 /*
