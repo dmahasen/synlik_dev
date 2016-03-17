@@ -21,8 +21,6 @@ RcppExport SEXP checkBoundsCpp(SEXP theMean_, SEXP cholFact_, SEXP toCheck_, SEX
 
 RcppExport SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_, SEXP kum2_);
 
-RcppExport SEXP mst(SEXP X_);
-
 /*
  * Simulators
  */
