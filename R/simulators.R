@@ -46,6 +46,40 @@
   t(matrix(oo$n, n.t, n.reps))
 }
 
+
+#' Simulates from the crashing model
+#' 
+#' @description Simulator for XXX
+#' @param param vector of parameters: r, K, alpha and beta. 
+#'              Alternatively a matrix \code{nsim} by 4 were each row is
+#'              a different parameter vector.
+#'
+#' @param ... Need for compatibility with \code{synlik}, but not used.
+#'
+#' @return A matrix \code{nsim} by \code{nObs}, where each row is a simulated path.
+#' @author Simon Wood and Matteo Fasiolo <matteo.fasiolo@@gmail.com>.
+#' @examples
+#' @export
+crashSimul <- function(param, nsim, extraArgs, ...)
+{
+  if( !all( c("nObs", "nBurn") %in% names(extraArgs) ) ) stop("extraArgs should contain nBurn and nObs")
+  nBurn <- extraArgs$nBurn
+  nObs <- extraArgs$nObs
+  
+  if( is.null(extraArgs$randInit) ) randInit = TRUE else randInit <- extraArgs$randInit
+  
+  if( is.null(extraArgs$initVal) ) initVal = 1.0 else initVal <- extraArgs$initVal
+  
+  if( !is.matrix(param) ) param <- matrix(param, 1, length(param))
+  
+  param <- log(param)
+  
+  out <- .Call( "crashModelCpp", days = nObs, nSimul = nsim, param = param, randInit = randInit, initVal = initVal, PACKAGE = "synlik" )
+  
+  out[ , (nBurn+1):nObs]
+}
+
+
 ################
 ########
 #' Simulates from the ricker model

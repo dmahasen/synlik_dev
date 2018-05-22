@@ -27,4 +27,7 @@ RcppExport SEXP ecgfCpp(SEXP lambda_, SEXP X_, SEXP mix_, SEXP grad_, SEXP kum1_
 
 RcppExport SEXP simpleModelsWrap(SEXP model, SEXP days, SEXP nSimul, SEXP params, SEXP nBurn, SEXP randInit, SEXP initVal);
 
+RcppExport SEXP crashModelCpp(SEXP days_, SEXP nSimul_, SEXP param_, SEXP randInit_, SEXP initVal_);
+
+
 #endif
