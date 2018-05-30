@@ -4,7 +4,7 @@ exportPattern("^[[:alpha:]]+")
 # Imported stuff
 importFrom(compiler, "cmpfun")
 
-importFrom(methods)
+importFrom(methods, "as", "callNextMethod", "is", "new")
 
 importFrom(abind, "abind")
 
@@ -12,9 +12,7 @@ importFrom(plyr, "alply", "laply", "aaply")
 
 importFrom(doSNOW, "registerDoSNOW")
 
-importFrom(MSS, "rlm")
-
-importFrom(Rcpp)
+importFrom(MASS, "rlm")
 
 importFrom(parallel, "clusterApply")
 importFrom(parallel, "clusterEvalQ")
@@ -23,8 +21,16 @@ importFrom(parallel, "makeCluster")
 importFrom(parallel, "stopCluster")
 importFrom(parallel, "detectCores")
 
-importFrom(stats, "simulate", "coef", "vcov", "confint", "logLik")
+importFrom(stats, "simulate", "coef", "vcov", "confint", "logLik", 
+           "approx", "cor", "median", "qchisq", "qgamma",
+           "qnorm", "qqline", "qqnorm", "rnorm", "runif")
 
-importFrom(graphics, "plot")
+importFrom(graphics, "plot", "abline", "axis", "hist", "image", "layout",
+             "lines", "par", "points")
 
 importFrom(Matrix, "nearPD")
+
+importFrom(grDevices, "colorRampPalette")
+
+importFrom(utils, "combn", "tail")
+

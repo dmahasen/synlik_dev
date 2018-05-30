@@ -1,17 +1,18 @@
 Package: synlik
 Type: Package
-Title: Synthetic Likelihood methods for intractable likelihoods.
-Version: 0.1.0
-Date: 2013-09-10
-Author: Matteo Fasiolo and Simon Wood
+Title: Synthetic Likelihood Methods for Intractable Likelihoods.
+Version: 0.1.1
+Date: 2018-05-22
+Author: Matteo Fasiolo and Simon N. Wood
 Maintainer: Matteo Fasiolo <matteo.fasiolo@gmail.com>
 Description: Framework to perform synthetic likelihood inference
     for models where the likelihood function is unavailable or
     intractable.
 License: GPL (>=2)
 URL: http://mfasiolo.github.io/synlik_release
+Depends: 
+    Rcpp
 Imports:
-    Rcpp (>= 0.10.4),
     methods,
     graphics,
     Matrix,
@@ -22,9 +23,10 @@ Imports:
     plyr,
     doSNOW,
     MASS
-Suggests: 
+Suggests:
     knitr,
     testthat,
     stabledist
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr
+RoxygenNote: 6.0.1
