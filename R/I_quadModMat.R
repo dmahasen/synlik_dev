@@ -3,9 +3,10 @@
 
 .quadModMat <- function(X, center = FALSE, scale = FALSE, deriv = FALSE)
 {
-  nPar <- ncol(X)
+  #nPar <- ncol(X) # when number of paramters = 1 , X is a vector 
   
   X <- scale(X, center = center, scale = scale)
+  nPar <- ncol(X)
   
   M <- cbind(1, X, X ^ 2 / ifelse(deriv, 2, 1))
      
