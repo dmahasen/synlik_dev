@@ -87,6 +87,14 @@ synGrad <- cmpfun(function(object, param, nsim, covariance,
   } else{ # Single core
     
     simulParams <- .paramsSimulator(theMean = param, covar = covariance, nsim = nsim, constr = constr)
+    
+    ##MAHSEN
+    if(is.null(param) | !is.numeric(param))
+    {
+      stop('param is not numeric')
+    }
+    
+    
     simulStats  <- .simulate.synlik(object, param = simulParams, nsim = nsim, stats = TRUE, clean = FALSE, verbose = FALSE, ...)  
     
   }

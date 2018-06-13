@@ -37,7 +37,7 @@
   coresSchedule <- if(multicore) c( rep(floor(nsim / ncores), ncores - 1), floor(nsim / ncores) + nsim %% ncores) else nsim
   
   ##MAHSEN
-  if(!is.numeric(param))
+  if(is.null(param) | !is.numeric(param))
   {
     stop('param is not numeric')
   }
