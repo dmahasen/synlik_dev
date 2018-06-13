@@ -36,6 +36,12 @@
   # Divide simulations between nodes
   coresSchedule <- if(multicore) c( rep(floor(nsim / ncores), ncores - 1), floor(nsim / ncores) + nsim %% ncores) else nsim
   
+  ##MAHSEN
+  if(!is.numeric(param))
+  {
+    stop('param is not numeric')
+  }
+  
   # Launch simulations
   withCallingHandlers({
     tmp <- alply(.data = coresSchedule,
