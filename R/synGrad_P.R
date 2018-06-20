@@ -57,7 +57,7 @@ synGrad_P <- cmpfun(function(param, nsim, covariance,
   ##MAHSEN
   if(is.null(simulParams) | !is.numeric(simulParams))
   {
-    stop(paste('simulParams is not numeric - theta = ', param, " obsData = ", obsData, sep=""))
+    stop(paste('simulParams is not numeric - theta = ', param, " obsY = ", obsData, sep=""))
   }
   
   

@@ -46,11 +46,13 @@
     stopifnot( length(upper) == length(lower), length(lower) <= nPar, length(indexes) == length(lower), 
                all(upper > lower) )
     
+    output <- .checkBoundsR(theMean = theMean, cholFact = cholFact, indexes = indexes,lower = lower, upper = upper,output = output)
+    
     # Calls C++ function that loops through output, and checks the constraints
-    output <- .Call("checkBoundsCpp", 
-                    theMean_ = theMean, cholFact_ = t(cholFact), indexes_ = indexes,            
-                    upper_ = upper, lower_ = lower, output_ = output, 
-                    PACKAGE = "synlik")
+    # output <- .Call("checkBoundsCpp", 
+    #                 theMean_ = theMean, cholFact_ = t(cholFact), indexes_ = indexes,            
+    #                 upper_ = upper, lower_ = lower, output_ = output, 
+    #                 PACKAGE = "synlik")
   }
   
   # Resetting the parameters that are fixed.
@@ -58,6 +60,47 @@
   
   return(output)
 }
+
+
+
+
+
+.checkBoundsR <- function(theMean,cholFact,indexes,upper,lower,output)
+{
+  found <- FALSE
+  jj <- 1
+  iSimul <- 1
+  nChecks <- length(indexes)
+  nsim <- dim(output)[1]
+  # Check one row of output at the time
+  while(iSimul < nsim+1)
+  {
+    found = FALSE;
+    jj = 1;
+    
+    #We move along each row as long as there are new elements to check (in indexes) or we find an element
+    # that lays outside the boundaries.
+    while( jj < nChecks+1 & !found)
+    {
+      if( output[iSimul, indexes[jj]] > upper[jj] | output[iSimul, indexes[jj]] < lower[jj])
+      {
+        found = TRUE
+      }
+      jj <- jj+1
+    }
+    
+    # If found == true the vector lays outside the boundaries and we simulate it again
+    if(found) 
+    {
+      output[iSimul,] <-  rmvn(1, mu = theMean, sigma = cholFact, isChol = TRUE) 
+    } else {
+      iSimul <- iSimul+1
+    }
+    
+  }
+  return(output)
+  
+} 
 
 
 ####
