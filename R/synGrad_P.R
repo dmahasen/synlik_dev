@@ -85,6 +85,15 @@ synGrad_P <- cmpfun(function(param, nsim, covariance,
     simulParams <- simulParams[ !outl, ]
   }
   
+  # MAHASEN - to avoid errors in fitting regression model of summary statistics with parameters 
+  #check summary statitics with variance zero. 
+  badSStats <- which(diag(cov(simulStats))==0)
+  
+  if(length(badSStats)>0)
+  {
+    simulStats <- simulStats[,-badSStats]
+  }
+  
   nGood <- nrow(simulStats)
   
   # Adding the latest component to the mixture
@@ -108,6 +117,12 @@ synGrad_P <- cmpfun(function(param, nsim, covariance,
    # summaries <- object@summaries
    # obserStats <- if( !is.null(summaries) ) drop( summaries(x = theData, extraArgs = object@extraArgs, ...) ) else drop( theData )
     obserStats <- summaryStat(theData,d)
+    
+    # MAHASEN
+    if(length(badSStats)>0)
+    {
+      obserStats <- obserStats[-badSStats] 
+    }
     obserStats <- fearn_beta %*% c(1, obserStats)
   } else{
     simulStats <- t(simulStats)
