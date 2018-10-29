@@ -44,8 +44,14 @@ slik_P <- function(param, nsim, obsData, simulator,summaryStat,d,uRN)
   
   simulSS <- .clean(X = simulSS, verbose = verbose)$cleanX
   
-  if(nrow(simulSS) < nsim / 3) warning(paste(nsim - nrow(simulSS), "out of", nsim, "statistics vectors", "contain NAs and will not be used"))
+  simulSS <- simulSS[is.finite(rowSums(simulSS)),] #### MAHASEN remove infinit values. 
   
+  
+  # if(nrow(simulSS) < nsim / 3) warning(paste(nsim - nrow(simulSS), "out of", nsim, "statistics vectors", "contain NAs and will not be used"))
+  # 
+  if(nrow(simulSS) < nsim / 3) stop(paste(nsim - nrow(simulSS), "out of", nsim, "statistics vectors", "contain NAs and will not be used"))
+  
+
   # Transforming the observation into stats
   obsStats <- summaryStat(obsData,d)
    
