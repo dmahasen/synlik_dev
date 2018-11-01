@@ -76,6 +76,20 @@ synGrad_P <- cmpfun(function(param, nsim, covariance,
   }
   rm(clean)
   
+  #### Begin  MAHASEN 1/11/2018
+  infStat <- is.infinite(rowSums(simulStats))
+  
+  simulStats <- simulStats[!infStat,]
+  simulParams <- simulParams[!infStat,]
+  
+  numInfStat <- sum(infStat)
+  if(numInfStat > 0.75 * nsim)
+  {
+    stop( paste(numInfStat, "out of", nsim, "statistics vectors", "contain INF and will not be used") )
+  }
+  
+  ### End  MAHASEN 1/11/2018
+
   # Remove outliers that lay more than 6 MADs away from the median
   meds <- colMedians( simulStats )
   mads <- colMads( simulStats )
