@@ -1,7 +1,7 @@
 Package: synlik
 Type: Package
 Title: Synthetic Likelihood methods for intractable likelihoods.
-Version: 0.2.1
+Version: 0.2.2
 Date: 2018-05-30
 Author: Matteo Fasiolo and Simon Wood
 Maintainer: Matteo Fasiolo <matteo.fasiolo@gmail.com>
