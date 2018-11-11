@@ -26,6 +26,8 @@
 #' @param ncores  (integer) number of cores to use if multicore == TRUE.
 #' @param cluster an object of class c("SOCKcluster", "cluster"). This allowes the user to pass her own cluster,
 #'                which will be used if multicore == TRUE. The user has to remember to stop the cluster. 
+#' @param checkRegr  Check the fitted regression on summary statistics. 
+#' @param tolR2     cutoff value for R2 
 #' @param ... additional arguments to be passed to object@@simulator and object@@summaries.
 #'            In general I would avoid using it and including in those two function everything they need.
 #'
@@ -40,7 +42,7 @@ synGrad_P <- cmpfun(function(param, nsim, covariance,
                            addRegr = TRUE, fixVar = TRUE, nBoot = 100, 
                            constr = list(), 
                            multicore = FALSE, ncores = detectCores() - 1, cluster = NULL, 
-                           tolVar = 10 * .Machine$double.eps, ...)
+                           tolVar = 10 * .Machine$double.eps, checkRegr = FALSE,tolR2=0.25, ...)
 {
   
   theData <- obsData
@@ -107,6 +109,12 @@ synGrad_P <- cmpfun(function(param, nsim, covariance,
     simulParams <- simulParams[ !outl, ]
   }
   
+  if(!is.matrix(simulParams))
+  {
+    simulParams <- matrix(simulParams,ncol = 1)
+  }
+  
+  
   # MAHASEN - to avoid errors in fitting regression model of summary statistics with parameters 
   #check summary statitics with variance zero. 
   badSStats <- which(diag(cov(simulStats))==0)
@@ -134,7 +142,27 @@ synGrad_P <- cmpfun(function(param, nsim, covariance,
     fearn_beta <- t( qr.coef(qrx, simulParams) )
     fearn_beta[is.na(fearn_beta)] <- 0 # Putting to zero the regression coefficients that are NAs
     
-    simulStats <- tcrossprod(fearn_beta, simulStats)
+    #### Begin  MAHASEN 10/11/2018
+    ### Check the R^2 value of the fitted regression 
+    
+    fittedParams <- tcrossprod(fearn_beta, simulStats)
+    if(checkRegr)
+    {
+      R2 <- rep(NA,nPar)
+      for(i in 1:nPar)
+      {
+        R2[i] <- 1 - sum((simulParams[,i]-fittedParams[i,])^2)/sum((simulParams[,i] - mean(simulParams[,i]))^2)
+      }
+      
+      if(any(R2 < tolR2)) # this 1 - R2
+        stop( paste("One of the added regression models does not fit well.", "Minimum R2 value ",min(R2), sep=" "))
+    }
+   
+    
+    simulStats <- fittedParams
+    #simulStats <- tcrossprod(fearn_beta, simulStats)
+    
+    #### END  MAHASEN 10/11/2018
     
    # summaries <- object@summaries
    # obserStats <- if( !is.null(summaries) ) drop( summaries(x = theData, extraArgs = object@extraArgs, ...) ) else drop( theData )
